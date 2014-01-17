@@ -1,5 +1,6 @@
 #!/bin/sh
 
+
 git branch -D gh-pages
 git checkout --orphan gh-pages
 npm update && bower install && grunt build
