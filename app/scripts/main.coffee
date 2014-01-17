@@ -2,6 +2,7 @@
 'use strict'
 
 require.config
+  baseUrl: 'scripts/'
   shim:
     underscore:
       exports: '_'
@@ -11,15 +12,11 @@ require.config
         'jquery'
       ]
       exports: 'Backbone'
-    bootstrap:
-      deps: ['jquery'],
-      exports: 'jquery'
   paths:
     jquery: '../bower_components/jquery/jquery'
     backbone: '../bower_components/backbone/backbone'
     underscore: '../bower_components/underscore/underscore'
-    bootstrap: '../bower_components/sass-bootstrap/dist/js/bootstrap'
 
-require ['app'], (App) ->
-  app = new App()
-  app.initialize()
+define ['app'], (SuperTable) ->
+  new SuperTable()
+  

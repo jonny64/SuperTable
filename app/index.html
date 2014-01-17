@@ -31,11 +31,26 @@
                 <p class="custom-style">lorem ipsum</p>
                 <p class="another-custom-style">lorem ipsum</p>
             </div>
-            <div class="backbone-container"></div>
+            <div id="table-container"></div>
         </div>
 
         <!-- build:js scripts/main.js -->
         <script data-main="scripts/main" src="bower_components/requirejs/require.js"></script>
         <!-- endbuild -->
+        <script type="text/javascript">
+          var options = {
+              url: '/lorem.html', 
+              el: '#table-container' 
+          };
+          if (typeof require == 'function') {
+            // running in development
+            require(['main'], function(SuperTable){
+              SuperTable.initialize(options);
+            });
+          } else {
+            // running in production
+            window.SuperTable.initialize(options);
+          }
+        </script>
 </body>
 </html>
