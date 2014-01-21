@@ -2,6 +2,7 @@ define ['backbone', 'views/page'], (Backbone, PageView) ->
   class TableView extends Backbone.View
     itemView: PageView
     initialize: ->
+      @listenTo @model, 'change:content', @render
       if @collection
         @listenTo @collection, 'add', @addItem
         @listenTo @collection, 'remove', @removeItem
@@ -10,12 +11,22 @@ define ['backbone', 'views/page'], (Backbone, PageView) ->
         
     render: ->
       @resetCollection()
-      @collection.each @addItem
+      if @model.get('content')
+        @$el.html @model.get('content')
+        @$('table').attr 'role', 'table'
+        @$('tbody').attr 'role', 'table-body'
+        @$('thead').attr 'role', 'table-head'
+        @collection.each @addItem
+        @_fixHead()
       @
+
+    _fixHead: =>
+      @$('@table').fixedHeaderTable
+        height: "500"
 
     addItem: (model) =>
       view = new @itemView(model: model)
-      @$el.append view.render().el
+      @$('@table-body').append view.render().el
       console.log "add item: #{model.cid}"
       @views[model.cid] = view
 
