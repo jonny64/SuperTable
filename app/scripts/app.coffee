@@ -1,13 +1,17 @@
 define [
+  'underscore',
   'backbone',
   'models/table',
+  'views/layout',
   'views/table',
   'collections/page',
   'services/page_fetching'
-], (Backbone, TableModel, TableView, PageCollection, PageFetchingService) ->
+], (_, Backbone, TableModel, LayoutView, TableView, PageCollection, PageFetchingService) ->
   
   class App
     initialize: (options) ->
+      _.extend @, Backbone.Events
+      
       console.log 'app starting...'
       
       unless options.url
@@ -19,11 +23,13 @@ define [
       pages = new PageCollection()
       table = new TableModel()
       table.set 'pages', pages
-      view = new TableView(el: el, model: table, collection: pages)
+      tableView = new TableView(model: table, collection: pages)
+      layoutView = new LayoutView(app: @, el: el, table: tableView)
 
-      view.render()
+      layoutView.render()
 
       pageFetchingService = new PageFetchingService
+        app: @
         collection: pages
         url: options.url
 
