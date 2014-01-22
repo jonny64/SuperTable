@@ -14,14 +14,14 @@ define [
       
       console.log 'app starting...'
       
-      unless options.url
+      unless options.pageUrl and options.tableUrl
         console.log 'url is a mandatory parameter'
         return false
         
       el = options.el || 'body'
 
       pages = new PageCollection()
-      table = new TableModel()
+      table = new TableModel({}, {url: options.tableUrl})
       table.set 'pages', pages
       tableView = new TableView(model: table, collection: pages)
       layoutView = new LayoutView(app: @, el: el, table: tableView)
@@ -30,8 +30,9 @@ define [
 
       pageFetchingService = new PageFetchingService
         app: @
+        table: table
         collection: pages
-        url: options.url
+        pageUrl: options.pageUrl
 
       pageFetchingService.getPage(0)
       pageFetchingService.getPage(1)

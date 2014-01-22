@@ -198,6 +198,7 @@ module.exports = function (grunt) {
                     paths: {
                         'templates': '../../.tmp/scripts/templates',
                         'jquery.role': '../../app/bower_components/rolejs/lib/jquery.role',
+                        'fixedheadertable': '../../app/bower_components/fixedheadertable/jquery.fixedheadertable.min',
                         'jquery': '../../app/bower_components/jquery/jquery',
                         'underscore': '../../app/bower_components/underscore/underscore',
                         'backbone': '../../app/bower_components/backbone/backbone'
@@ -239,7 +240,8 @@ module.exports = function (grunt) {
                 files: {
                     '<%= yeoman.dist %>/styles/main.css': [
                         '.tmp/styles/{,*/}*.css',
-                        '<%= yeoman.app %>/styles/{,*/}*.css'
+                        '<%= yeoman.app %>/styles/{,*/}*.css',
+                        '<%= yeoman.app %>/bower_components/fixedheadertable/css/{,*/}*.css'
                     ]
                 }
             }
