@@ -16,19 +16,22 @@ define ['backbone', 'views/page'], (Backbone, PageView) ->
         @$('table').attr 'role', 'table'
         @$('tbody').attr 'role', 'table-body'
         @$('thead').attr 'role', 'table-head'
-        @collection.each @addItem
+        @collection.each (e) => @addItem(e, true)
         @_fixHead()
       @
 
     _fixHead: =>
+      @$('@table').fixedHeaderTable 'destroy'
       @$('@table').fixedHeaderTable
-        height: "500"
+        height: "800"
+        fixedColumn: true
 
-    addItem: (model) =>
+    addItem: (model, skip) =>
       view = new @itemView(model: model)
       @$('@table-body').append view.render().el
       console.log "add item: #{model.cid}"
       @views[model.cid] = view
+      @_fixHead() unless skip
 
     removeItem: (model) ->
       console.log "remove item: #{model.cid}"
