@@ -1,6 +1,6 @@
 'use strict';
 var LIVERELOAD_PORT = 35729;
-var SERVER_PORT = 9000;
+var SERVER_PORT = 3001;
 var lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT});
 var mountFolder = function (connect, dir) {
     return connect.static(require('path').resolve(dir));
@@ -20,6 +20,7 @@ module.exports = function (grunt) {
     require('load-grunt-tasks')(grunt);
 
     grunt.loadNpmTasks('grunt-haml');
+    grunt.loadNpmTasks('grunt-version');
 
     // configurable paths
     var yeomanConfig = {
@@ -28,6 +29,13 @@ module.exports = function (grunt) {
     };
 
     grunt.initConfig({
+        version: {
+          options: {
+          },
+          defaults: {
+            src: ['app/scripts/version.js']
+          }
+        },
         yeoman: yeomanConfig,
         watch: {
             options: {
