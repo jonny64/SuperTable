@@ -5,19 +5,21 @@ define [
   'views/layout',
   'views/table',
   'collections/page',
-  'services/page_fetching'
-], (_, Backbone, TableModel, LayoutView, TableView, PageCollection, PageFetchingService) ->
-  
+  'services/page_fetching',
+  'version'
+], (_, Backbone, TableModel, LayoutView, TableView, PageCollection, PageFetchingService, Version) ->
+
   class App
     initialize: (options) ->
       _.extend @, Backbone.Events
-      
+
       console.log 'app starting...'
-      
+      $('#app_version').text window.version
+
       unless options.pageUrl and options.tableUrl
         console.log 'url is a mandatory parameter'
         return false
-        
+
       el = options.el || 'body'
 
       pages = new PageCollection()
