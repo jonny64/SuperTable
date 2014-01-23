@@ -5,7 +5,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
 
       @listenTo options.app, 'more-button:click', =>
         @getPage(1 + @lastPage())
-      
+
       @collection = options.collection
       #TODO api object/service
       @pageUrl = options.pageUrl

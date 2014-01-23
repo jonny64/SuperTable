@@ -9,4 +9,3 @@ define ['backbone', 'templates/footer'], (Backbone, template) ->
 
     _onClickMore: (e) ->
       @options.app.trigger 'more-button:click'
-    
