@@ -5,4 +5,5 @@ define ['backbone'], (Backbone) ->
 
     render: ->
       @$el.replaceWith @model.get('content') if @model?.get('content')?
+      @trigger 'rendered'
       @
