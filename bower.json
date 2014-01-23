@@ -5,7 +5,7 @@
     "sass-bootstrap": "~3.0.0",
     "jquery": "~1.9.0",
     "rolejs": "https://github.com/kossnocorp/role.git#1.3.1",
-    "fixedheadertable": "https://github.com/markmalek/Fixed-Header-Table.git",
+    "fixedheadertable": "https://github.com/aleksxor/fixedheadertable.git",
     "underscore": "~1.4.3",
     "backbone": "~1.0.0",
     "requirejs": "~2.1.5",
