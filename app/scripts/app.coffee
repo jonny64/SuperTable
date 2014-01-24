@@ -12,10 +12,10 @@ define [
     initialize: (options) ->
       _.extend @, Backbone.Events
 
-      console.log 'app starting...'
-
       version='0.1.1'
       $('#app_version').text version
+
+      console.log "app starting version #{version}..."
 
       unless options.pageUrl and options.tableUrl
         console.log 'url is a mandatory parameter'
