@@ -9,13 +9,11 @@ define [
 ], (_, Backbone, TableModel, LayoutView, TableView, PageCollection, PageFetchingService) ->
 
   class App
+    version: '0.1.1'
     initialize: (options) ->
       _.extend @, Backbone.Events
 
-      version='0.1.1'
-      $('#app_version').text version
-
-      console.log "app starting version #{version}..."
+      console.log "app starting version #{@version}..."
 
       unless options.pageUrl and options.tableUrl
         console.log 'url is a mandatory parameter'

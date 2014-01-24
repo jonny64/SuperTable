@@ -27,6 +27,11 @@
 
         <div id="layout-container"></div>
 
+        <div class="container">
+          <hr/>
+          Версия:
+          <span id='app_version'>?</span>
+        </div>
         <!-- build:js scripts/main.js -->
         <script data-main="scripts/main" src="bower_components/requirejs/require.js"></script>
         <!-- endbuild -->
@@ -40,16 +45,13 @@
             // running in development
             require(['main'], function(SuperTable){
               SuperTable.initialize(options);
+              document.getElementById('app_version').textContent = SuperTable.version;
             });
           } else {
             // running in production
             window.SuperTable.initialize(options);
+            document.getElementById('app_version').textContent = window.SuperTable.version;
           }
         </script>
-        <div class="container">
-          <hr/>
-          Версия:
-          <span id='app_version'>?</span>
-        </div>
 </body>
 </html>
