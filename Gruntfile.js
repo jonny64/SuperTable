@@ -29,6 +29,11 @@ module.exports = function (grunt) {
     };
 
     grunt.initConfig({
+        uglify: {
+          options: {
+            sourceMap: 'dist/application.js.map'
+          }
+        },
         version: {
           options: {
             build_number: process.env.BUILD_NUMBER
