@@ -31,6 +31,7 @@ module.exports = function (grunt) {
     grunt.initConfig({
         version: {
           options: {
+            build_number: process.env.BUILD_NUMBER
           },
           defaults: {
             src: ['app/scripts/app.coffee']

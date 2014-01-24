@@ -9,7 +9,7 @@ define [
 ], (_, Backbone, TableModel, LayoutView, TableView, PageCollection, PageFetchingService) ->
 
   class App
-    version: '0.1.1'
+    version: '0.1.2'
     initialize: (options) ->
       _.extend @, Backbone.Events
 
