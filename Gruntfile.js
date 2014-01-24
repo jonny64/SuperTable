@@ -293,7 +293,8 @@ module.exports = function (grunt) {
             },
             index: {
                 files: {
-                    '<%= yeoman.dist %>/index.html': '<%= yeoman.app %>/index.html'
+                    '<%= yeoman.dist %>/index.html': '<%= yeoman.app %>/index.html',
+                    '.tmp/scripts/version.js': '<%= yeoman.app %>/scripts/version.js'
                 }
             }
         },
