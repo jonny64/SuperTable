@@ -15,7 +15,7 @@
      grunt server
 
 
-Обновлени версии
+Обновлени версии при релизе
 --
 
     npm version patch
@@ -28,7 +28,3 @@
 * [Расчеты по времени](https://docs.google.com/spreadsheet/ccc?key=0ArR1ApxjK8jPdGZIR1Utby1sbE9vNVZYTndhVlIweFE#gid=0)
 
 
-TODO
---
-
-* Версионирование: https://github.com/vojtajina/grunt-bump
