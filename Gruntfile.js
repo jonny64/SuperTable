@@ -208,6 +208,7 @@ module.exports = function (grunt) {
                         'templates': '../../.tmp/scripts/templates',
                         'jquery.role': '../../app/bower_components/rolejs/lib/jquery.role',
                         'jquery.spin': '../../app/bower_components/spinjs/jquery.spin',
+                        'spin': '../../app/bower_components/spinjs/spin',
                         'fixedheadertable': '../../app/bower_components/fixedheadertable/jquery.fixedheadertable.min',
                         'jquery': '../../app/bower_components/jquery/jquery',
                         'underscore': '../../app/bower_components/underscore/underscore',
@@ -272,7 +273,7 @@ module.exports = function (grunt) {
                 files: [{
                     expand: true,
                     cwd: '<%= yeoman.app %>',
-                    src: ['*.html', '!index.html'],
+                    src: ['*.html', '!index.html', '!table.html', '!contents.html'],
                     dest: '<%= yeoman.dist %>'
                 }]
             }
@@ -295,7 +296,9 @@ module.exports = function (grunt) {
             },
             index: {
                 files: {
-                    '<%= yeoman.dist %>/index.html': '<%= yeoman.app %>/index.html'
+                    '<%= yeoman.dist %>/index.html': '<%= yeoman.app %>/index.html',
+                    '<%= yeoman.dist %>/table.html': '<%= yeoman.app %>/table.html',
+                    '<%= yeoman.dist %>/contents.html': '<%= yeoman.app %>/contents.html'
                 }
             }
         },
