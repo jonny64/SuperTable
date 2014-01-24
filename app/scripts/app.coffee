@@ -26,7 +26,7 @@ define [
       pages = new PageCollection()
       table = new TableModel({}, {url: options.tableUrl})
       table.set 'pages', pages
-      tableView = new TableView(model: table, collection: pages)
+      tableView = new TableView(app: @, model: table, collection: pages)
       layoutView = new LayoutView(app: @, el: el, table: tableView)
 
       layoutView.render()
@@ -38,4 +38,3 @@ define [
         pageUrl: options.pageUrl
 
       pageFetchingService.getPage(0)
-      pageFetchingService.getPage(1)
