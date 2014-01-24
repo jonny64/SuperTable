@@ -1,5 +1,6 @@
 define ['backbone', 'views/page'], (Backbone, PageView) ->
   class TableView extends Backbone.View
+    className: 'main-table'
     itemView: PageView
     events:
       'scroll': '_onScroll'
@@ -25,6 +26,9 @@ define ['backbone', 'views/page'], (Backbone, PageView) ->
         @collection.each @addItem
         @_fixHead()
       @
+
+    onShow: ->
+      @$el.spin() unless @model.get('content')
 
     _fixHead: =>
       @$('@table').fixedHeaderTable 'destroy'
@@ -54,3 +58,5 @@ define ['backbone', 'views/page'], (Backbone, PageView) ->
     _onScroll: (e) =>
       if (@$sc.prop('scrollHeight') <= (@$sc.scrollTop() + @$sc.height()))
         @options.app.trigger 'scroll:bottom'
+      else
+        @options.app.trigger 'scroll'

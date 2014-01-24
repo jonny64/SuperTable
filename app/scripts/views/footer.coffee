@@ -5,6 +5,7 @@ define ['backbone', 'templates/footer'], (Backbone, template) ->
 
     initialize: ->
       @listenTo @options.app, 'scroll:bottom', @_show
+      @listenTo @options.app, 'scroll', @_hide
 
     render: ->
       @$el.html template()

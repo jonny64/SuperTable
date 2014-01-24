@@ -12,3 +12,5 @@ define [
         width: @$('@table-container').width()
         height: @$('@table-container').height()
       @$('@table-container').html @options.table.render(containerOptions).el
+
+      @options.table.onShow()
