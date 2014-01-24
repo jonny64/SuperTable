@@ -33,7 +33,7 @@ module.exports = function (grunt) {
           options: {
           },
           defaults: {
-            src: ['app/scripts/version.js']
+            src: ['app/scripts/app.coffee']
           }
         },
         yeoman: yeomanConfig,
@@ -293,8 +293,7 @@ module.exports = function (grunt) {
             },
             index: {
                 files: {
-                    '<%= yeoman.dist %>/index.html': '<%= yeoman.app %>/index.html',
-                    '.tmp/scripts/version.js': '<%= yeoman.app %>/scripts/version.js'
+                    '<%= yeoman.dist %>/index.html': '<%= yeoman.app %>/index.html'
                 }
             }
         },

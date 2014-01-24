@@ -25,4 +25,3 @@ require.config
 
 define ['app'], (SuperTable) ->
   new SuperTable()
-  
