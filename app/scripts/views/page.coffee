@@ -4,6 +4,9 @@ define ['backbone'], (Backbone) ->
       @listenTo(@model, 'sync', @render) if @model
 
     render: ->
-      @$el.replaceWith @model.get('content') if @model?.get('content')?
+      if @model?.get('content')?
+        @$el.replaceWith @model.get('content')
+      else
+        @$el.spin()
       @trigger 'rendered'
       @

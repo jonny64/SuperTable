@@ -13,12 +13,15 @@ require.config
         'underscore'
         'jquery'
         'jquery.role'
+        'jquery.spin'
         'fixedheadertable'
       ]
       exports: 'Backbone'
   paths:
     jquery: '../bower_components/jquery/jquery'
     'jquery.role': '../bower_components/rolejs/lib/jquery.role'
+    spin: '../bower_components/spinjs/spin'
+    'jquery.spin': '../bower_components/spinjs/jquery.spin'
     fixedheadertable: '../bower_components/fixedheadertable/jquery.fixedheadertable.min'
     backbone: '../bower_components/backbone/backbone'
     underscore: '../bower_components/underscore/underscore'

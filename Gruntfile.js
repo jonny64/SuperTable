@@ -206,6 +206,7 @@ module.exports = function (grunt) {
                     paths: {
                         'templates': '../../.tmp/scripts/templates',
                         'jquery.role': '../../app/bower_components/rolejs/lib/jquery.role',
+                        'jquery.spin': '../../app/bower_components/spinjs/jquery.spin',
                         'fixedheadertable': '../../app/bower_components/fixedheadertable/jquery.fixedheadertable.min',
                         'jquery': '../../app/bower_components/jquery/jquery',
                         'underscore': '../../app/bower_components/underscore/underscore',
