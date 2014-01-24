@@ -10,9 +10,31 @@ $icon-font-path: "/bower_components/sass-bootstrap/fonts/";
 }
 
 /* Space out content a bit */
+html {
+    height: 100%;
+    min-height: 100%;
+}
+
 body {
-    padding-top: 20px;
-    padding-bottom: 20px;
+    height: 100%;
+    min-height: 100%;
+}
+
+#layout-container {
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
+}
+
+.table-container {
+    height: 100%;
+    width: 100%;
+    padding-bottom: 40px;
+}
+
+.table-footer {
+    height: 40px;
+    margin-top: -40px;
 }
 
 /* Everything but the jumbotron gets side spacing for mobile first views */

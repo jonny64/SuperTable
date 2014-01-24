@@ -1,6 +1,9 @@
 define ['backbone', 'views/page'], (Backbone, PageView) ->
   class TableView extends Backbone.View
     itemView: PageView
+    events:
+      'scroll': '_onScroll'
+      
     initialize: ->
       @listenTo @model, 'change:content', @render
       if @collection
@@ -9,7 +12,10 @@ define ['backbone', 'views/page'], (Backbone, PageView) ->
         @listenTo @collection, 'reset', @resetCollection
       @views = {}
         
-    render: ->
+    render: (options) ->
+      @width ||= options?.width || 800
+      @height ||= options?.height || 1200
+      console.log "table dims: w:#{@width} h:#{@height}"
       @resetCollection()
       if @model.get('content')
         @$el.html @model.get('content')
@@ -23,8 +29,11 @@ define ['backbone', 'views/page'], (Backbone, PageView) ->
     _fixHead: =>
       @$('@table').fixedHeaderTable 'destroy'
       @$('@table').fixedHeaderTable
-        height: "800"
+        height: "" + @height
+        width: "" + @width
         fixedColumn: true
+      @$sc = @$('.fht-fixed-body .fht-tbody')
+      @$sc.scroll(@_onScroll)
 
     addItem: (model) =>
       view = new @itemView(model: model)
@@ -41,3 +50,7 @@ define ['backbone', 'views/page'], (Backbone, PageView) ->
     resetCollection: ->
       @$el.empty()
       @views = {}
+
+    _onScroll: (e) =>
+      if (@$sc.prop('scrollHeight') <= (@$sc.scrollTop() + @$sc.height()))
+        @options.app.trigger 'scroll:bottom'
