@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 git branch -D gh-pages
 git checkout --orphan gh-pages
