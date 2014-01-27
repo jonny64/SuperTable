@@ -3,6 +3,7 @@
 
 [![Build Status](http://jenkins.icfdev.ru/buildStatus/icon?job=SuperTable)](http://jenkins.icfdev.ru/job/SuperTable/)
 [![Build Status](http://jenkins.icfdev.ru/job/SuperTable/badge/icon)](http://jenkins.icfdev.ru/job/SuperTable/)
+[Build Status](http://jenkins.icfdev.ru/job/SuperTable/badge/icon)
 
 Установка и запуск
 --
