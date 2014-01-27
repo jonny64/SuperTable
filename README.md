@@ -1,6 +1,8 @@
 Супер-таблицы
 =============
 
+[![Build Status](http://jenkins.icfdev.ru/buildStatus/icon?job=SuperTable)](http://jenkins.icfdev.ru/job/SuperTable/)
+
 Установка и запуск
 --
 
@@ -19,6 +21,19 @@
 --
 
     npm version patch
+    
+    
+Вывод через таблицы
+--
+
+* https://github.com/BrandyMint/SuperTable.table
+* http://brandymint.github.io/SuperTable.table/
+
+
+CI
+--
+
+* http://jenkins.icfdev.ru/job/SuperTable/
     
     
 Ссылочки
