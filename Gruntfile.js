@@ -159,7 +159,7 @@ module.exports = function (grunt) {
         },
         coffee: {
             options: {
-              sourceMap: true
+              sourceMap: false
             },
             dist: {
                 files: [{
@@ -217,7 +217,6 @@ module.exports = function (grunt) {
                         'jquery.role': '../../app/bower_components/rolejs/lib/jquery.role',
                         'jquery.spin': '../../app/bower_components/spinjs/jquery.spin',
                         'spin': '../../app/bower_components/spinjs/spin',
-                        'fixedheadertable': '../../app/bower_components/fixedheadertable/jquery.fixedheadertable.min',
                         'jquery': '../../app/bower_components/jquery/jquery',
                         'underscore': '../../app/bower_components/underscore/underscore',
                         'backbone': '../../app/bower_components/backbone/backbone'
@@ -259,8 +258,7 @@ module.exports = function (grunt) {
                 files: {
                     '<%= yeoman.dist %>/styles/main.css': [
                         '.tmp/styles/{,*/}*.css',
-                        '<%= yeoman.app %>/styles/{,*/}*.css',
-                        '<%= yeoman.app %>/bower_components/fixedheadertable/css/{,*/}*.css'
+                        '<%= yeoman.app %>/styles/{,*/}*.css'
                     ]
                 }
             }
@@ -281,7 +279,7 @@ module.exports = function (grunt) {
                 files: [{
                     expand: true,
                     cwd: '<%= yeoman.app %>',
-                    src: ['*.html', '!index.html', '!table.html', '!contents.html'],
+                    src: ['*.html', '!index.html'],
                     dest: '<%= yeoman.dist %>'
                 }]
             }
@@ -304,9 +302,7 @@ module.exports = function (grunt) {
             },
             index: {
                 files: {
-                    '<%= yeoman.dist %>/index.html': '<%= yeoman.app %>/index.html',
-                    '<%= yeoman.dist %>/table.html': '<%= yeoman.app %>/table.html',
-                    '<%= yeoman.dist %>/contents.html': '<%= yeoman.app %>/contents.html'
+                    '<%= yeoman.dist %>/index.html': '<%= yeoman.app %>/index.html'
                 }
             }
         },

@@ -3,10 +3,8 @@ define [
   'backbone',
   'models/table',
   'views/layout',
-  'views/table',
-  'collections/page',
   'services/page_fetching'
-], (_, Backbone, TableModel, LayoutView, TableView, PageCollection, PageFetchingService) ->
+], (_, Backbone, TableModel, LayoutView, PageFetchingService) ->
 
   class App
     version: '0.1.2'
@@ -21,18 +19,14 @@ define [
 
       el = options.el || 'body'
 
-      pages = new PageCollection()
       table = new TableModel({}, {url: options.tableUrl})
-      table.set 'pages', pages
-      tableView = new TableView(app: @, model: table, collection: pages)
-      layoutView = new LayoutView(app: @, el: el, table: tableView)
+      layoutView = new LayoutView(app: @, el: el, table: table)
 
       layoutView.render()
 
       pageFetchingService = new PageFetchingService
         app: @
         table: table
-        collection: pages
         pageUrl: options.pageUrl
 
       pageFetchingService.getPage(0)
