@@ -6,20 +6,18 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @listenTo options.app, 'more-button:click', =>
         @getPage(1 + @lastPage())
 
-      @collection = options.collection
       #TODO api object/service
       @pageUrl = options.pageUrl
-      @pages = {}
       @table = options.table
       @getTable()
 
     getTable: (options) =>
       @table.fetch
         success: -> options?.success?()
-        dataType: 'text'
+        dataType: 'json'
 
     getPage: (index) =>
-      if @table.get('content')
+      if @table.get('head')
         @_cachePage(index)
       else
         @getTable
@@ -41,7 +39,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         error: =>
           page.collection.remove(page)
           delete @pages[index]
-        dataType: 'text'
+        dataType: 'json'
 
     lastPage: =>
       _(@pages)
