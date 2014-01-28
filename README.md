@@ -45,3 +45,7 @@ CI
 * [Расчеты по времени](https://docs.google.com/spreadsheet/ccc?key=0ArR1ApxjK8jPdGZIR1Utby1sbE9vNVZYTndhVlIweFE#gid=0)
 
 
+Конвертация таблицы
+-------------------
+
+    bundle exec ./utils/parse_table.rb ./app/data/table.html > ./app/data/table.json
