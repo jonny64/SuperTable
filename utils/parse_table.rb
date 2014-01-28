@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
 require 'rubygems'; require 'bundler/setup'; Bundler.require
 require 'open-uri'
 
@@ -25,6 +26,7 @@ def clear_attribute key, attr
     return nil if value.to_i<=1
   elsif key==''
   end
+  value
 end
 
 def parse_rows doc, path, row_num=1
