@@ -9,11 +9,17 @@
   border: 1px solid black
   overflow: hidden
 
+.st-table-container table, tr, td
+  border-spacing: 0
+  margin: 0
+  padding: 0
+
 .st-table-header-left-pane
   position: absolute
   top: 0
   left: 0
   overflow: hidden
+  border-left: 2px solid #eeeeee
 
 .st-table-header-right-pane
   overflow: hidden
@@ -21,25 +27,26 @@
   top: 0
   
 .st-table-header-left-columns
+  border-collapse: collapse
   position: relative
   overflow: hidden
 
 .st-table-header-right-columns
+  border-collapse: collapse
   position: relative
   overflow: hidden
 
 .st-table-header-column
-  width: 120px //calculable
-  position: relative
   overflow: hidden
   text-align: center
   vertical-align: middle
-  display: inline-block
+  border: 1px solid #bbbbbb
 
 .st-table-left-viewport
   position: absolute
   overflow-y: hidden
   overflow-x: scroll
+  border-left: 2px solid #eeeeee
   left: 0
 
 .st-table-right-viewport
@@ -48,16 +55,19 @@
   overflow-x: scroll
 
 .st-table-left-canvas
+  border-collapse: collapse
 
 .st-table-right-canvas
+  border-collapse: collapse
 
 .st-table-row
 
 .st-table-cell
-  position: relative
   overflow: hidden
-  width: 120px //calculable
-  display: inline-block
+  border: 1px solid #dddddd
+
+.scrollbar-place
+  min-width: 25px
 
 .numeric-cell
   text-align: right
