@@ -49,3 +49,4 @@ CI
 -------------------
 
     bundle exec ./utils/parse_table.rb ./app/data/table.html > ./app/data/table.json
+    bundle exec ./utils/parse_table.rb ./app/data/table.html 2 > ./app/data/table2.json # Вторая страница

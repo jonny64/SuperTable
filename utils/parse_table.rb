@@ -2,38 +2,55 @@
 require 'rubygems'; require 'bundler/setup'; Bundler.require
 require 'open-uri'
 
+ROWS = 53
+AVAILABLE_ATTRIBUTES=['rowspan', 'colspan', 'style', 'class', 'title', 'onclick']
+
 # Формат: https://gist.github.com/dapi/8649553
 
 file = ARGV[0] || raise("Укажите файл для парсинга параметром")
+page = ARGV[1] || 1; page = page.to_i
+row_start = (page-1) * ROWS + 1
+show_header = page == 1
+pretty_json = false
 
 doc = Nokogiri::HTML( open(file), nil, 'UTF-8')
 
-AVAILABLE_ATTRIBUTES=['rowspan', 'colspan', 'style', 'class', 'title', 'onclick']
+def clear_attribute key, attr
+  return nil unless attr
+  value = attr.value
+  return nil if value.nil? || value.empty?
+  return nil if value == '; color:'
+  return nil if value == 'z-index:100;'
+  if key=='rowspan' || key == 'colspan'
+    return nil if value.to_i<=1
+  elsif key==''
+  end
+end
 
-
-def parse_rows doc, path
-  row_num = 0
+def parse_rows doc, path, row_num=1
   rows = {}
   doc.xpath(path).each do |tr|
-    row_num += 1
     row = { data: [] }
     tr.xpath('th|td').each do |th|
-      cell = { content: th.content }
+      th.content = ' ' if th.content.length==1 && th.content[0].ord == 160 # Удаляем невидимый пробел
+      cell = th.content.to_s.strip.empty? ? {} : { content: th.content }
       AVAILABLE_ATTRIBUTES.each do |attr|
-        value = th.attribute attr
-        cell[attr] = value.to_s unless value.nil? || value.blank?
+        value = clear_attribute attr, th.attribute( attr )
+        cell[attr] = value if value
       end
       row[:data] << cell
     end
     rows[row_num] = row
+    row_num += 1
   end
 
   rows
 end
 
 table = {
-  header: parse_rows(doc, '//thead/tr'),
-  data: parse_rows(doc, '//tbody/tr')
+  data: parse_rows(doc, '//tbody/tr', row_start)
 }
 
-puts table.to_json
+table['header'] = parse_rows(doc, '//thead/tr') if show_header
+
+puts pretty_json ? JSON.pretty_generate(table) : table.to_json
