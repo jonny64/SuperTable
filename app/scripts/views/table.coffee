@@ -9,13 +9,14 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         allColumns: 0
         columnWidth: 120
         headerHeight: 20
-        width: 800
-        height: 1200
+        width: 0
+        height: 0
       @listenTo @model, 'change:head change:body', @render
         
     render: ->
       @tableInfo.allColumns = @model.get('head')?.length
       if @model.get('head')
+        @_countWidths()
         @_renderTable()
         if @$el.width() and @$el.height()
           @_setPanesSize()
@@ -69,8 +70,8 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @$('.st-table-header-column').css height: @tableInfo.headerHeight
       @tableInfo.width = containerWidth
       @tableInfo.height = containerHeight
-      allColumnsWidth = @tableInfo.allColumns * @tableInfo.columnWidth
-      fixedColumnsWidth = @tableInfo.fixColumns * @tableInfo.columnWidth
+      allColumnsWidth = @_calcWidth(0, @tableInfo.allColumns)
+      fixedColumnsWidth = @_calcWidth(0, @tableInfo.fixColumns)
 
       rightCanvasWidth = allColumnsWidth - fixedColumnsWidth
       rightPaneWidth = _.min([containerWidth - fixedColumnsWidth, rightCanvasWidth + 25])
@@ -105,11 +106,25 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       row.slice(@tableInfo.fixColumns)
       
     _renderHeaderRow: (row) =>
-      out = ("<div class=\"st-table-header-column\">#{col}</div>" for col in row)
+      out = ("<div class=\"st-table-header-column\" style=\"width: #{col.width}px;\">#{col.content}</div>" for col in row)
       out.join("")
       
     _renderTableRow: (row) =>
       out = ["<div class=\"st-table-row\">"]
-      out.push("<div class=\"st-table-cell\">#{col}</div>") for col in row
+      out.push("<div class=\"st-table-cell\" style=\"width: #{cell.width}px;\">#{cell.content}</div>") for cell in row
       out.push("</div>")
       out.join("")
+
+    _calcWidth: (start, end) =>
+      return 0 unless @widths
+      end ?= start + 1
+      out = 0
+      out = out + width for width in @widths.slice(start, end)
+      out
+
+    _countWidths: =>
+      @widths = (col.width for col in @model.get('head'))
+      bodyContent = @model.get('body')
+      for row in bodyContent
+        for cell, index in row
+          cell.width = @widths[index]
