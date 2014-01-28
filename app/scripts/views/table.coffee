@@ -8,14 +8,16 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         fixColumns: 2
         allColumns: 0
         columnWidth: 120
+        borderWidth: 1
         headerHeight: 20
-        width: 800
-        height: 1200
+        width: 0
+        height: 0
       @listenTo @model, 'change:head change:body', @render
         
     render: ->
       @tableInfo.allColumns = @model.get('head')?.length
       if @model.get('head')
+        @_countWidths()
         @_renderTable()
         if @$el.width() and @$el.height()
           @_setPanesSize()
@@ -51,7 +53,7 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @headerLeftPane = @$('.st-table-header-left-pane')[0]
 
       @headerLeftColumns.innerHTML = @_renderHeaderRow(@_fixedCols(headContent))
-      @headerRightColumns.innerHTML = @_renderHeaderRow(@_restCols(headContent))
+      @headerRightColumns.innerHTML = @_renderHeaderRow(@_restCols(headContent), true)
 
       @tableLeftCanvas.innerHTML = (@_renderTableRow(@_fixedCols(row)) for row in bodyContent).join('')
       @tableRightCanvas.innerHTML = (@_renderTableRow(@_restCols(row)) for row in bodyContent).join('')
@@ -69,8 +71,8 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @$('.st-table-header-column').css height: @tableInfo.headerHeight
       @tableInfo.width = containerWidth
       @tableInfo.height = containerHeight
-      allColumnsWidth = @tableInfo.allColumns * @tableInfo.columnWidth
-      fixedColumnsWidth = @tableInfo.fixColumns * @tableInfo.columnWidth
+      allColumnsWidth = @_calcWidth(0, @tableInfo.allColumns)
+      fixedColumnsWidth = @_calcWidth(0, @tableInfo.fixColumns)
 
       rightCanvasWidth = allColumnsWidth - fixedColumnsWidth
       rightPaneWidth = _.min([containerWidth - fixedColumnsWidth, rightCanvasWidth + 25])
@@ -83,8 +85,8 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @headerRightPane.style.left = "#{fixedColumnsWidth}px"
       @headerRightPane.style.width = "#{rightPaneWidth}px"
 
-      @headerLeftColumns.style.width = "#{fixedColumnsWidth}px"
-      @headerRightColumns.style.width = "#{rightCanvasWidth + 25}px"
+      #@headerLeftColumns.style.width = "#{fixedColumnsWidth}px"
+      #@headerRightColumns.style.width = "#{rightCanvasWidth + 25}px"
 
       @tableLeftViewport.style.top = "#{@tableInfo.headerHeight}px"
       @tableLeftViewport.style.width = "#{fixedColumnsWidth}px"
@@ -95,8 +97,8 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @tableRightViewport.style.width = "#{rightPaneWidth}px"
       @tableRightViewport.style.height = "#{paneHeight}px"
       
-      @tableLeftCanvas.style.width = "#{fixedColumnsWidth}px"
-      @tableRightCanvas.style.width = "#{rightCanvasWidth}px"
+      #@tableLeftCanvas.style.width = "#{fixedColumnsWidth}px"
+      #@tableRightCanvas.style.width = "#{rightCanvasWidth}px"
 
     _fixedCols: (row) =>
       row.slice(0, @tableInfo.fixColumns)
@@ -104,12 +106,31 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
     _restCols: (row) =>
       row.slice(@tableInfo.fixColumns)
       
-    _renderHeaderRow: (row) =>
-      out = ("<div class=\"st-table-header-column\">#{col}</div>" for col in row)
+    _renderHeaderRow: (row, scrollbar) =>
+      out = []
+      out.push "<tr>"
+      out.push("<td class=\"st-table-header-column\" style=\"min-width: #{col.width}px;\">#{col.content}</td>") for col in row
+      out.push "<td class=\"scrollbar-place\"></td>" if scrollbar
+      out.push "</tr>"
       out.join("")
       
     _renderTableRow: (row) =>
-      out = ["<div class=\"st-table-row\">"]
-      out.push("<div class=\"st-table-cell\">#{col}</div>") for col in row
-      out.push("</div>")
+      out = ["<tr class=\"st-table-row\">"]
+      out.push("<td class=\"st-table-cell\" style=\"min-width: #{cell.width}px;\">#{cell.content}</td>") for cell in row
+      out.push("</tr>")
       out.join("")
+
+    _calcWidth: (start, end) =>
+      return 0 unless @widths
+      end ?= start + 1
+      out = 0
+      out = out + width for width in @widths.slice(start, end)
+      out = out + (end - start + 1) * @tableInfo.borderWidth
+      out
+
+    _countWidths: =>
+      @widths = (col.width for col in @model.get('head'))
+      bodyContent = @model.get('body')
+      for row in bodyContent
+        for cell, index in row
+          cell.width = @widths[index]
