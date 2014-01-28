@@ -12,19 +12,18 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         headerHeight: 20
         width: 0
         height: 0
-      @listenTo @model, 'change:head change:body', @render
+      @listenTo @model, 'change:header change:data', @render
         
     render: ->
-      @tableInfo.allColumns = @model.get('head')?.length
-      if @model.get('head')
-        @_countWidths()
+      @tableInfo.allColumns = @model.get('header')?.length
+      if @model.get('header')
         @_renderTable()
         if @$el.width() and @$el.height()
           @_setPanesSize()
       @
 
     onShow: ->
-      if @model.get('head')
+      if @model.get('header')
         @_setPanesSize()
       else
         @$el.spin()
@@ -38,8 +37,8 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @tableLeftViewport.scrollTop = scrollTop
       
     _renderTable: =>
-      headContent = @model.get('head')
-      bodyContent = @model.get('body')
+      headContent = @model.get('header')
+      bodyContent = @model.get('data')
       
       @tableContainer = @$('.st-table-container')[0]
       @$tableRightViewport = @$('.st-table-right-viewport')
@@ -52,17 +51,17 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @headerRightPane = @$('.st-table-header-right-pane')[0]
       @headerLeftPane = @$('.st-table-header-left-pane')[0]
 
-      @headerLeftColumns.innerHTML = @_renderHeaderRow(@_fixedCols(headContent))
-      @headerRightColumns.innerHTML = @_renderHeaderRow(@_restCols(headContent), true)
+      #@headerLeftColumns.innerHTML = @_renderHeaderRow(@_fixedCols(headContent))
+      #@headerRightColumns.innerHTML = @_renderHeaderRow(@_restCols(headContent), true)
 
-      @tableLeftCanvas.innerHTML = (@_renderTableRow(@_fixedCols(row)) for row in bodyContent).join('')
-      @tableRightCanvas.innerHTML = (@_renderTableRow(@_restCols(row)) for row in bodyContent).join('')
+      @tableLeftCanvas.innerHTML = (@_renderTableRow(@_fixedCols(row.data)) for key, row of bodyContent).join('')
+      @tableRightCanvas.innerHTML = (@_renderTableRow(@_restCols(row.data)) for key, row of bodyContent).join('')
 
       @$tableRightViewport.unbind 'scroll', @_onScroll
       @$tableRightViewport.bind 'scroll', @_onScroll
       
     _setPanesSize: =>
-      return unless @tableContainer and @tableInfo.allColumns
+      return unless @tableContainer #and @tableInfo.allColumns
       containerWidth = @$el.width()
       containerHeight = @$el.height()
       return unless (@tableInfo.width - containerWidth) + (@tableInfo.height - containerHeight)
@@ -72,9 +71,14 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @tableInfo.width = containerWidth
       @tableInfo.height = containerHeight
       allColumnsWidth = @_calcWidth(0, @tableInfo.allColumns)
-      fixedColumnsWidth = @_calcWidth(0, @tableInfo.fixColumns)
+      fixedColumnsWidth = Math.max(@tableLeftCanvas.clientWidth,
+                                   @tableLeftCanvas.offsetWidth,
+                                   @tableLeftCanvas.scrollWidth)
+        #@_calcWidth(0, @tableInfo.fixColumns)
 
-      rightCanvasWidth = allColumnsWidth - fixedColumnsWidth
+      rightCanvasWidth = Math.max(@tableRightCanvas.clientWidth,
+                                  @tableRightCanvas.offsetWidth,
+                                  @tableRightCanvas.scrollWidth)
       rightPaneWidth = _.min([containerWidth - fixedColumnsWidth, rightCanvasWidth + 25])
       paneHeight = containerHeight - @tableInfo.headerHeight
 
@@ -115,8 +119,12 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       out.join("")
       
     _renderTableRow: (row) =>
-      out = ["<tr class=\"st-table-row\">"]
-      out.push("<td class=\"st-table-cell\" style=\"min-width: #{cell.width}px;\">#{cell.content}</td>") for cell in row
+      out = []
+      out.push "<tr class=\"st-table-row\">"
+      for cell in row
+        style = if cell.width then " style=\"min-width: #{cell.width}\"" else ""
+        content = if cell.content? then cell.content else ""
+        out.push("<td class=\"st-table-cell\"#{style}>#{content}</td>")
       out.push("</tr>")
       out.join("")
 
@@ -129,8 +137,8 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       out
 
     _countWidths: =>
-      @widths = (col.width for col in @model.get('head'))
-      bodyContent = @model.get('body')
-      for row in bodyContent
-        for cell, index in row
-          cell.width = @widths[index]
+      @widths = ((col.width || @tableInfo.columnWidth) for col of @model.get('header'))
+      #bodyContent = @model.get('body')
+      #for row in bodyContent
+      #  for cell, index in row
+      #    cell.width = @widths[index]
