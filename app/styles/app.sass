@@ -14,6 +14,13 @@
   margin: 0
   padding: 0
 
+.st-table-container table
+  table-layout: fixed
+
+.st-table-container td
+  overflow: hidden
+  line-height: inherit
+
 .st-table-header-left-pane
   position: absolute
   top: 0
@@ -65,7 +72,6 @@
   height: 19px
 
 .st-table-cell
-  overflow: hidden
   white-space: nowrap
   padding: 0 4px
   border: 1px solid #dddddd
@@ -75,3 +81,11 @@
 
 .numeric-cell
   text-align: right
+
+.st-table-column-holder
+  min-width: 120px
+  width: 120px
+  padding: 0
+
+.st-table-row-holder
+  padding: 0
