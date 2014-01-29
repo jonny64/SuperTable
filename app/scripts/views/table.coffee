@@ -11,7 +11,7 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         rowHeight: 20
         width: 0
         height: 0
-      @listenTo @model, 'change:header change:data', @render
+      @listenTo @model, 'change:data', @render
         
     render: ->
       @_assignRegions()
@@ -46,25 +46,33 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @headerLeftColumns = @$('.st-table-header-left-columns')[0]
       @headerRightPane = @$('.st-table-header-right-pane')[0]
       @headerLeftPane = @$('.st-table-header-left-pane')[0]
+      @$tablePre = @$('table.st-table-pre-render')
       
     _renderContainer: =>
       headContent = @model.get('header')
       bodyContent = @model.get('data')
 
-      @headerLeftColumns.innerHTML = @_renderTable(@_selectCols(headContent,
-                                                               0,
-                                                               @tableInfo.fixColumns),
-                                                   @tableInfo)
-      @headerRightColumns.innerHTML = @_renderTable(@_selectCols(headContent,
-                                                               @tableInfo.fixColumns),
-                                                    @tableInfo)
-      @tableLeftCanvas.innerHTML = @_renderTable(@_selectCols(bodyContent,
-                                                              0,
-                                                              @tableInfo.fixColumns),
-                                                 @tableInfo)
-      @tableRightCanvas.innerHTML = @_renderTable(@_selectCols(bodyContent,
-                                                               @tableInfo.fixColumns),
-                                                  @tableInfo)
+      @tableInfo.widths = @_countWidths(headContent, bodyContent)
+      leftWidths = @tableInfo.widths.slice(0, @tableInfo.fixColumns)
+      rightWidths = @tableInfo.widths.slice(@tableInfo.fixColumns) 
+
+      @headerLeftColumns.innerHTML = @_renderTable(
+        @_selectCols(headContent, 0, @tableInfo.fixColumns),
+        @tableInfo,
+        leftWidths)
+      @headerRightColumns.innerHTML = @_renderTable(
+        @_selectCols(headContent, @tableInfo.fixColumns),
+        @tableInfo,
+        rightWidths,
+        true)
+      @tableLeftCanvas.innerHTML = @_renderTable(
+        @_selectCols(bodyContent, 0, @tableInfo.fixColumns),
+        @tableInfo,
+        leftWidths)
+      @tableRightCanvas.innerHTML = @_renderTable(
+        @_selectCols(bodyContent, @tableInfo.fixColumns),
+        @tableInfo,
+        rightWidths)
                                                   
       @$tableRightViewport.unbind 'scroll', @_onScroll
       @$tableRightViewport.bind 'scroll', @_onScroll
@@ -80,10 +88,11 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @tableInfo.width = containerWidth
       @tableInfo.height = containerHeight
       headerHeight = @_elHeight @headerRightColumns
-      fixedColumnsWidth = @_elWidth @tableLeftCanvas
-      rightCanvasWidth = @_elWidth @tableRightCanvas
+      
+      fixedColumnsWidth = _(@tableInfo.widths.slice(0, @tableInfo.fixColumns)).reduce(((memo, el) -> memo + el), 0)
+      rightCanvasWidth = _(@tableInfo.widths.slice(@tableInfo.fixColumns)).reduce(((memo, el) -> memo + el), 0)
 
-      scrollWidth = 25 #calculate
+      scrollWidth = @_scrollBarWidth()
                                   
       rightPaneWidth = _.min([containerWidth - fixedColumnsWidth, rightCanvasWidth + scrollWidth])
       paneHeight = containerHeight - headerHeight
@@ -103,6 +112,10 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @tableRightViewport.style.left = "#{fixedColumnsWidth}px"
       @tableRightViewport.style.width = "#{rightPaneWidth}px"
       @tableRightViewport.style.height = "#{paneHeight}px"
+
+      @headerLeftColumns.style.width = @tableLeftCanvas.style.width = "#{fixedColumnsWidth}px"
+      @headerRightColumns.style.width = "#{rightCanvasWidth + scrollWidth}px"
+      @tableRightCanvas.style.width = "#{rightCanvasWidth}px"
       
     _selectCols: (table, start, num) =>
       template = @_buildTemplateTable(table)
@@ -158,12 +171,15 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
             marker = marker + 1
       template
 
-    _renderTable: (table, tableInfo, topTable=true) =>
+    _renderTable: (table, tableInfo, widths, scrollHolder=false) =>
       return unless _.isObject(table)
       html = []
-      if topTable
+      if widths
         html.push "<tr class=\"st-table-width-row\"><th class=\"st-table-row-holder\"></td>"
-        html.push("<th class=\"st-table-column-holder\"></td>") for i in [1..@_tableWidth(table)]
+        for width in widths
+          style = if width then " style=\"width: #{width}px;\"" else ""
+          html.push("<th class=\"st-table-column-holder\"#{style}></th>")
+        html.push("<th class=\"scrollbar-place\" style=\"width: #{@_scrollBarWidth()}px;\"></th>") if scrollHolder
         html.push "</tr>"
       _(table)
         .chain()
@@ -173,7 +189,7 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
           options =
             style: "height:#{row.height || tableInfo.rowHeight}px;"
           html.push "<tr #{@_tagAttributes(_.extend(options, row))}>"
-          html.push "<th class=\"st-table-row-holder\"></td>"
+          html.push "<th class=\"st-table-row-holder\"></th>"
           _(row.data).each((cell) =>
             options =
               class: _.compact([cell.class, "st-table-cell"]).join(" ")
@@ -181,6 +197,7 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
             html.push cell.content
             html.push "</td>"
           )
+          html.push("<td class=\"scrollbar-place\"></td>") if scrollHolder
           html.push "</tr>"
         )
 
@@ -210,3 +227,26 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
 
     _elHeight: (obj) ->
       Math.max obj.clientHeight, obj.offsetHeight, obj.scrollHeight
+
+    _countWidths: (head, body) =>
+      widths = (0 for i in [1..@_tableWidth(head)])
+      if head
+        @$tablePre.html @_renderTable(head, @tableInfo, widths)
+      @$tablePre.append @_renderTable(body, @tableInfo)
+
+      @$tablePre
+        .find('tr.st-table-width-row')
+        .eq(0)
+        .find('th.st-table-column-holder')
+        .map((i, e) => @_elWidth(e))
+
+    _scrollBarWidth: =>
+      return @scrollBarWidth if @scrollBarWidth
+      div = document.createElement('div')
+      div.innerHTML = '<div style="width:50px;height:50px;position:absolute;left:-50px;top:-50px;overflow:auto;"><div style="width:1px;height:100px;"></div></div>'
+      div = div.firstChild
+      document.body.appendChild(div)
+      width = div.offsetWidth - div.clientWidth
+      document.body.removeChild(div)
+      @scrollBarWidth = width
+                                                      

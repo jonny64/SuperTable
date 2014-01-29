@@ -17,7 +17,24 @@
 .st-table-container table
   table-layout: fixed
 
-.st-table-container td
+.table-pre-renderer
+  position: fixed
+  top: -10000px
+  left: -10000px
+  width: 100px
+  height: 100px
+  overflow: hidden
+
+table.st-table-pre-render
+  table-layout: auto
+  border-collapse: collapse
+
+.st-table-pre-render table, tr, td, th
+  border-spacing: 0
+  margin: 0
+  padding: 0
+
+.st-table-container td, th
   overflow: hidden
   line-height: inherit
 
@@ -77,7 +94,7 @@
   border: 1px solid #dddddd
 
 .scrollbar-place
-  min-width: 25px
+  border-left: 1px solid #dddddd
 
 .numeric-cell
   text-align: right
@@ -89,3 +106,4 @@
 
 .st-table-row-holder
   padding: 0
+
