@@ -9,4 +9,4 @@ define [
       @$el.empty()
       @$el.html template()
       (new FooterView(app: @options.app)).render()
-      (new TableView(model: @options.table)).render()
+      (new TableView(app: @options.app, model: @options.table)).render()
