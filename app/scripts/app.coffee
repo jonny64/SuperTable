@@ -29,4 +29,4 @@ define [
         table: table
         pageUrl: options.pageUrl
 
-      pageFetchingService.getPage(0)
+      pageFetchingService.getTable()

@@ -4,6 +4,7 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
     initialize: ->
       @tableInfo =
         currentRow: 0
+        currentPage: 0
         fixHeader: true
         fixColumns: 2
         columnWidth: 120
@@ -11,19 +12,34 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         rowHeight: 20
         width: 0
         height: 0
-      @listenTo @model, 'change:data', @render
+        rowsOnPage: 53
+
+      @model.set 'tableInfo', @tableInfo
+      @listenTo @options.app, 'page:loading', => @$el.spin()
+      @listenTo @model, 'change:header', (model, val) =>
+        @_headerRendered = false
+        @_renderContainer(model.get('header'), model.get('data'))
+      @listenTo @model, 'change:data', (model, val) =>
+        model.set 'data', (_.extend({}, model.previousAttributes()['data'], val)), {silent: true}
+        @_dataRendered = false
+        @_renderContainer(model.get('header'), model.get('data'))
+
+      @prevScrollTop = 0
+      @prevScrollLeft = 0
+      @_headerRendered = false
+      @_dataRendered = false
+      
+      @_hitBottom = false
         
     render: ->
       @_assignRegions()
-      if @model.get('header')
-        @_renderContainer()
-        if @$el.width() and @$el.height()
-          @_setPanesSize()
+      @_renderContainer(@model.get('header'), @model.get('data'))
       @
 
     onShow: ->
-      if @model.get('header')
+      if @_headerRendered and @_dataRendered
         @_setPanesSize()
+        @_removeSpinner()
       else
         @$el.spin()
 
@@ -31,54 +47,105 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       return unless @tableRightViewport
       scrollLeft = @tableRightViewport.scrollLeft
       scrollTop = @tableRightViewport.scrollTop
-      
-      @headerRightPane.scrollLeft = scrollLeft
-      @tableLeftViewport.scrollTop = scrollTop
+
+      hScroll = Math.abs(scrollLeft - @prevScrollLeft)
+      vScroll = Math.abs(scrollTop - @prevScrollTop)
+
+      @prevScrollLeft = scrollLeft
+      @prevScrollTop = scrollTop
+
+      if hScroll
+        @headerRightPane.scrollLeft = scrollLeft
+
+      if vScroll
+        @tableLeftViewport.scrollTop = scrollTop
+
+        if (scrollTop + @tableRightViewport.clientHeight) >= @_elHeight(@tableRightViewport)
+          @options.app.trigger 'scroll:bottom'
+          @_hitBottom = true
+        else if @_hitBottom
+          @options.app.trigger 'scroll'
+          @_hitBottom = false
 
     _assignRegions: =>
       @tableContainer = @$('.st-table-container')[0]
       @$tableRightViewport = @$('.st-table-right-viewport')
       @tableRightViewport = @$tableRightViewport[0]
       @tableLeftViewport = @$('.st-table-left-viewport')[0]
-      @tableRightCanvas = @$('.st-table-right-canvas')[0]
-      @tableLeftCanvas = @$('.st-table-left-canvas')[0]
       @headerRightColumns = @$('.st-table-header-right-columns')[0]
       @headerLeftColumns = @$('.st-table-header-left-columns')[0]
       @headerRightPane = @$('.st-table-header-right-pane')[0]
       @headerLeftPane = @$('.st-table-header-left-pane')[0]
       @$tablePre = @$('table.st-table-pre-render')
+      @tableRightCanvas = @$('.st-table-right-canvas')[0]
+      @tableLeftCanvas = @$('.st-table-left-canvas')[0]
       
-    _renderContainer: =>
-      headContent = @model.get('header')
-      bodyContent = @model.get('data')
-
-      @tableInfo.widths = @_countWidths(headContent, bodyContent)
+    _calcHeader: (header, data) =>
+      return false unless header and data
+      @tableInfo.widths = @_countWidths(header, data)
       leftWidths = @tableInfo.widths.slice(0, @tableInfo.fixColumns)
       rightWidths = @tableInfo.widths.slice(@tableInfo.fixColumns) 
 
-      @headerLeftColumns.innerHTML = @_renderTable(
-        @_selectCols(headContent, 0, @tableInfo.fixColumns),
+      left: @_renderTable(
+        @_selectCols(header, 0, @tableInfo.fixColumns),
         @tableInfo,
         leftWidths)
-      @headerRightColumns.innerHTML = @_renderTable(
-        @_selectCols(headContent, @tableInfo.fixColumns),
+      right: @_renderTable(
+        @_selectCols(header, @tableInfo.fixColumns),
         @tableInfo,
         rightWidths,
         true)
-      @tableLeftCanvas.innerHTML = @_renderTable(
-        @_selectCols(bodyContent, 0, @tableInfo.fixColumns),
+
+    _calcData: (data) =>
+      return false unless @tableInfo.widths and data
+      leftWidths = @tableInfo.widths.slice(0, @tableInfo.fixColumns)
+      rightWidths = @tableInfo.widths.slice(@tableInfo.fixColumns)
+      
+      left: @_renderTable(
+        @_selectCols(data, 0, @tableInfo.fixColumns),
         @tableInfo,
         leftWidths)
-      @tableRightCanvas.innerHTML = @_renderTable(
-        @_selectCols(bodyContent, @tableInfo.fixColumns),
+      right: @_renderTable(
+        @_selectCols(data, @tableInfo.fixColumns),
         @tableInfo,
         rightWidths)
-                                                  
-      @$tableRightViewport.unbind 'scroll', @_onScroll
-      @$tableRightViewport.bind 'scroll', @_onScroll
+
+    _renderContainer: (header, data) =>
+      @_renderHeader(header, data)
+      @_renderData(data)
+
+    _renderHeader: (header, data) =>
+      return unless @headerRightColumns and !@_headerRendered
+      renderedHeader = @_calcHeader(header, data)
+
+      if renderedHeader
+        @headerLeftColumns.innerHTML = renderedHeader.left
+        @headerRightColumns.innerHTML = renderedHeader.right
+
+        @_headerRendered = true
+        @_setPanesSize()
+        @_removeSpinner()
+
+    _renderData: (data) =>
+      return unless @tableRightCanvas and !@_dataRendered
+      renderedData = @_calcData(data)
+
+      if renderedData
+        @tableLeftCanvas.innerHTML = renderedData.left
+        @tableRightCanvas.innerHTML = renderedData.right
+
+        @$tableRightViewport.unbind 'scroll', @_onScroll
+        @$tableRightViewport.bind 'scroll', @_onScroll
+
+        @_dataRendered = true
+        @_setPanesSize()
+        @_removeSpinner()
+
+    _removeSpinner: =>
+      @$el.spin(false) if @_headerRendered and @_dataRendered
       
     _setPanesSize: =>
-      return unless @tableContainer
+      return unless (@_headerRendered and @_dataRendered)
       containerWidth = @$el.width()
       containerHeight = @$el.height()
       return unless (@tableInfo.width - containerWidth) + (@tableInfo.height - containerHeight)
@@ -159,9 +226,8 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       tableHeight = @_tableHeight(table)
       template = ((false for i in [1..tableWidth]) for j in [1..tableHeight])
       marker = 1
-      _(table).each (row, rowNum) ->
+      _(table).chain().sort().toArray().each (row, r) ->
         _(row.data).each (cell) ->
-          r = parseInt(rowNum, 10) - 1
           firstTDIndex = template[r].indexOf(false)
           if firstTDIndex >= 0
             template[r][firstTDIndex] = {cell: cell}
@@ -213,10 +279,18 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         .value()
         .join(" ")
 
-    _tableWidth: (table) ->
-      return unless table['1']
+    _firstRow: (table) ->
+      minIndex = _(table).chain()
+              .keys()
+              .map((k) -> parseInt(k, 10))
+              .min()
+              .value()
+      table[minIndex]
+      
+    _tableWidth: (table) =>
+      return unless _.isObject(table)
       width = 0
-      _(table['1'].data).each (cell) ->
+      _(@_firstRow(table).data).each (cell) ->
         width = width + (if cell.colspan then parseInt(cell.colspan, 10) else 1)
       width
 
