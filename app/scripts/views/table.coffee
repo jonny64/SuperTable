@@ -93,6 +93,7 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       rightCanvasWidth = _(@tableInfo.widths.slice(@tableInfo.fixColumns)).reduce(((memo, el) -> memo + el), 0)
 
       scrollWidth = @_scrollBarWidth()
+      borderWidth = @tableInfo.borderWidth
                                   
       rightPaneWidth = _.min([containerWidth - fixedColumnsWidth, rightCanvasWidth + scrollWidth])
       paneHeight = containerHeight - headerHeight
@@ -114,7 +115,7 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @tableRightViewport.style.height = "#{paneHeight}px"
 
       @headerLeftColumns.style.width = @tableLeftCanvas.style.width = "#{fixedColumnsWidth}px"
-      @headerRightColumns.style.width = "#{rightCanvasWidth + scrollWidth}px"
+      @headerRightColumns.style.width = "#{rightCanvasWidth + scrollWidth + borderWidth}px"
       @tableRightCanvas.style.width = "#{rightCanvasWidth}px"
       
     _selectCols: (table, start, num) =>
@@ -179,7 +180,7 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         for width in widths
           style = if width then " style=\"width: #{width}px;\"" else ""
           html.push("<th class=\"st-table-column-holder\"#{style}></th>")
-        html.push("<th class=\"scrollbar-place\" style=\"width: #{@_scrollBarWidth()}px;\"></th>") if scrollHolder
+        html.push("<th class=\"scrollbar-place\" style=\"max-width: #{@_scrollBarWidth() + tableInfo.borderWidth}px;\"></th>") if scrollHolder
         html.push "</tr>"
       _(table)
         .chain()
