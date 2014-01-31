@@ -3,8 +3,6 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
     el: '@table-container'
     initialize: ->
       @tableInfo =
-        currentRow: 0
-        currentPage: 0
         fixHeader: true
         fixColumns: 2
         columnWidth: 120
@@ -13,12 +11,11 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         width: 0
         height: 0
         rowsOnPage: 52
-        totalRows: 104
+        totalRows: 156
 
       @model.set 'tableInfo', @tableInfo
       @listenTo @options.app, 'page:loading', => @$el.spin()
       @listenTo @model, 'change:data', (model, val) =>
-        model.set 'data', (_.extend({}, model.previousAttributes()['data'], val)), {silent: true}
         @_dataRendered = false
         @_headerRendered = false if 'header' in model.changed
         @_renderContainer(model.get('header'), model.get('data'))

@@ -3,7 +3,7 @@
 require 'rubygems'; require 'bundler/setup'; Bundler.require
 require 'open-uri'
 
-ROWS = 53
+ROWS = 52
 AVAILABLE_ATTRIBUTES=['rowspan', 'colspan', 'style', 'bgcolor', 'class', 'title', 'onclick']
 
 # Формат: https://gist.github.com/dapi/8649553

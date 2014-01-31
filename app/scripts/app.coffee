@@ -13,7 +13,7 @@ define [
 
       console.log "app starting version #{@version}..."
 
-      unless options.pageUrl and options.tableUrl
+      unless options.tableUrl
         console.log 'url is a mandatory parameter'
         return false
 

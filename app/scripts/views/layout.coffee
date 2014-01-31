@@ -8,5 +8,5 @@ define [
     render: ->
       @$el.empty()
       @$el.html template()
-      (new HeaderView(app: @options.app)).render()
+      (new HeaderView(app: @options.app, model: @options.table)).render()
       (new TableView(app: @options.app, model: @options.table)).render()
