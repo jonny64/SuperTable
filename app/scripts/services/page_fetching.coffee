@@ -28,11 +28,13 @@ define ['underscore', 'backbone'], (_, Backbone) ->
     _fetchPage: (index) =>
       @app.trigger 'page:loading'
       #TODO table.fetchPage with calculated url
+      pageUrl = @pageUrl.replace('#{page}', index)
       @table.fetch
-        url: @pageUrl
+        url: pageUrl
+        error: -> alert("Ошибка при загрузке страницы")
         dataType: 'json'
 
     lastPage: =>
       body = @table.get('data')
       tableInfo = @table.get('tableInfo')
-      Math.ceil(body.length / tableInfo.rowsOnPage)
+      Math.ceil(_.size(body) / tableInfo.rowsOnPage)

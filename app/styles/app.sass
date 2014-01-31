@@ -1,13 +1,22 @@
 @import 'include'
 
-.table-container
+.main-container
+  display: table
   width: 100%
   height: 100%
 
+.table-container
+  display: table-row
+  width: 100%
+  height: 100%
+
+.table-header
+  display: table-row
+  height: 30px
+
 .table-footer
   position: relative
-  padding: 6px
-  height: 40px
+  height: 0
 
 .st-table-container
   position: relative
@@ -112,3 +121,10 @@ table.st-table-pre-render
 .st-table-row-holder
   padding: 0
 
+.st-btn
+  margin-right: 10px
+  &:active, &:visited
+    color: blue
+  &.disabled
+    color: #dddddd
+  

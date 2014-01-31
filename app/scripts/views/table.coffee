@@ -12,7 +12,8 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         rowHeight: 20
         width: 0
         height: 0
-        rowsOnPage: 53
+        rowsOnPage: 52
+        totalRows: 104
 
       @model.set 'tableInfo', @tableInfo
       @listenTo @options.app, 'page:loading', => @$el.spin()
@@ -151,10 +152,10 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @$el.spin(false) if @_headerRendered and @_dataRendered
       
     _setPanesSize: =>
-      return unless (@_headerRendered and @_dataRendered)
+      return unless (@el and @_headerRendered and @_dataRendered)
       console.log 'set panes size'
-      containerWidth = @$el.width()
-      containerHeight = @$el.height()
+      containerWidth = @_elWidth(@el)
+      containerHeight = @_elHeight(@el)
       return unless (@tableInfo.width - containerWidth) + (@tableInfo.height - containerHeight)
 
       console.log "setting sizes for width: #{containerWidth}, height: #{containerHeight}"

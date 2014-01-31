@@ -1,15 +1,17 @@
-.table-header{role: 'header'}
+.main-container
+  .table-header{role: 'header'}
 
-.table-container{role: 'table-container'}
-  .st-table-container
-    .st-table-header-left-pane
-      %table.st-table-header-left-columns
-    .st-table-header-right-pane
-      %table.st-table-header-right-columns
-    .st-table-left-viewport
-      %table.st-table-left-canvas
-    .st-table-right-viewport
-      %table.st-table-right-canvas
-  .table-pre-renderer
-    %table.st-table-pre-render
-.table-footer{role: 'footer'}
+  .table-container{role: 'table-container'}
+    .st-table-container
+      .st-table-header-left-pane
+        %table.st-table-header-left-columns
+      .st-table-header-right-pane
+        %table.st-table-header-right-columns
+      .st-table-left-viewport
+        %table.st-table-left-canvas
+      .st-table-right-viewport
+        %table.st-table-right-canvas
+    .table-pre-renderer
+      %table.st-table-pre-render
+
+  .table-footer{role: 'footer'}
