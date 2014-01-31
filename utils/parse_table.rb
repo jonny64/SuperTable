@@ -4,7 +4,7 @@ require 'rubygems'; require 'bundler/setup'; Bundler.require
 require 'open-uri'
 
 ROWS = 53
-AVAILABLE_ATTRIBUTES=['rowspan', 'colspan', 'style', 'class', 'title', 'onclick']
+AVAILABLE_ATTRIBUTES=['rowspan', 'colspan', 'style', 'bgcolor', 'class', 'title', 'onclick']
 
 # Формат: https://gist.github.com/dapi/8649553
 
@@ -31,11 +31,16 @@ end
 
 def parse_rows doc, path, row_num=1
   rows = {}
+  first_row = row_num
   doc.xpath(path).each do |tr|
     row = { data: [] }
     tr.xpath('th|td').each do |th|
       th.content = ' ' if th.content.length==1 && th.content[0].ord == 160 # Удаляем невидимый пробел
       cell = th.content.to_s.strip.empty? ? {} : { content: th.content }
+
+      # Добавляем номер строки чтобы была видна разница при подгрузке второй страницы
+      cell[:content] << row_num if first_row>1 if cell[:content]
+
       AVAILABLE_ATTRIBUTES.each do |attr|
         value = clear_attribute attr, th.attribute( attr )
         cell[attr] = value if value
