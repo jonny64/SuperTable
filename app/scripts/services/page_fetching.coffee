@@ -5,7 +5,14 @@ define ['underscore', 'backbone'], (_, Backbone) ->
 
       @app = options.app
       @listenTo options.app, 'more-button:click', =>
-        @getPage(1 + @lastPage())
+        page = @table.lastPage() + 1
+        if page <= @table.totalPages() then @mergePage(page)
+      @listenTo options.app, 'next-page:click', =>
+        page = @table.lastPage() + 1
+        if page <= @table.totalPages() then @getPage(page)
+      @listenTo options.app, 'prev-page:click', =>
+        page = @table.firstPage() - 1
+        if page > 0 then @getPage(page)
 
       #TODO api object/service
       @pageUrl = options.pageUrl
@@ -13,26 +20,25 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @getTable()
 
     getTable: (options) =>
-      @app.trigger 'page:loading'
-      @table.fetch
-        success: -> options?.success?()
-        dataType: 'json'
+      @_fetchPage(null, 'table')
 
+    mergePage: (index) =>
+      @_fetchPage(index, 'merge')
+      
     getPage: (index) =>
-      if @table.get('header')
-        @_fetchPage(index)
-      else
-        @getTable
-          success: => @_fetchPage(index)
+      @_fetchPage(index, 'get')
 
-    _fetchPage: (index) =>
+    _fetchPage: (index, type) =>
       @app.trigger 'page:loading'
       #TODO table.fetchPage with calculated url
       @table.fetch
-        url: @pageUrl
+        url: @_apiUrl(index, type)
+        error: -> alert("Ошибка при загрузке страницы")
         dataType: 'json'
+        fetchType: type
 
-    lastPage: =>
-      body = @table.get('data')
-      tableInfo = @table.get('tableInfo')
-      Math.ceil(body.length / tableInfo.rowsOnPage)
+    _apiUrl: (index, type) ->
+      switch type
+        when 'table' then @table.url.replace('#{page}', '')
+        else @table.url.replace('#{page}', index)
+

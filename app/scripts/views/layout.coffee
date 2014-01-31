@@ -1,12 +1,12 @@
 define [
   'backbone',
   'views/table',
-  'views/footer',
+  'views/header',
   'templates/layout'],
-(Backbone, TableView, FooterView, template) ->
+(Backbone, TableView, HeaderView, template) ->
   class LayoutView extends Backbone.View
     render: ->
       @$el.empty()
       @$el.html template()
-      (new FooterView(app: @options.app)).render()
+      (new HeaderView(app: @options.app, model: @options.table)).render()
       (new TableView(app: @options.app, model: @options.table)).render()
