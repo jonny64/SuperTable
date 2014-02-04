@@ -17,7 +17,6 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       #TODO api object/service
       @pageUrl = options.pageUrl
       @table = options.table
-      @getTable()
 
     getTable: (options) =>
       @_fetchPage(null, 'table')
@@ -29,6 +28,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @_fetchPage(index, 'get')
 
     _fetchPage: (index, type) =>
+      console.log 'fetching page'
       @app.trigger 'page:loading'
       #TODO table.fetchPage with calculated url
       @table.fetch

@@ -267,22 +267,35 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         .sort()
         .toArray()
         .each((row) =>
-          options =
-            style: "height:#{row.height || tableInfo.rowHeight}px;"
-          html.push "<tr #{@_tagAttributes(_.extend(options, row))}>"
+          @_addStyle row, "height:#{row.height || tableInfo.rowHeight}px;"
+          html.push "<tr #{@_tagAttributes(row)}>"
           html.push "<th class=\"st-table-row-holder\"></th>"
-          _(row.data).each((cell) =>
-            options =
-              class: _.compact([cell.class, "st-table-cell"]).join(" ")
-            html.push "<td #{@_tagAttributes(_.extend({}, cell, options))}>"
-            html.push cell.content
-            html.push "</td>"
-          )
+          _(row.data).each((cell) => html.push @_renderCell(cell))
           html.push("<td class=\"scrollbar-place\"></td>") if scrollHolder
           html.push "</tr>"
         )
 
       html.join("")
+
+    _renderCell: (cell) =>
+      out = []
+      @_addClass(cell, "st-table-cell")
+      out.push "<td #{@_tagAttributes(cell)}>"
+      out.push cell.content
+      out.push @_renderSortBlock(cell.order) if cell.order?
+      out.push "</td>"
+      out.join("")
+
+    _renderSortBlock: (order) =>
+      out = []
+      
+
+    _addClass: (cell, klass) ->
+      cell.class = _.compact([cell.class, klass]).join(" ")
+
+    _addStyle: (cell, style) ->
+      cell.style = _.compact([cell.style, style]).join("; ")
+      
 
     _tagAttributes: (data) ->
       _(data)
