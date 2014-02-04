@@ -12,9 +12,11 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         height: 0
         rowsOnPage: 52
         totalRows: 156
+        order: [{"id270":"asc"}]
 
       @model.set 'tableInfo', @tableInfo
-      @listenTo @options.app, 'page:loading', => @$el.spin()
+      @listenTo @options.app, 'page:loading', @_startSpinner
+      @listenTo @options.app, 'page:loaded', @_stopSpinner
       @listenTo @model, 'change:data', (model, val) =>
         @_dataRendered = false
         @_headerRendered = false if 'header' in model.changed
@@ -30,13 +32,14 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
     render: ->
       console.log 'render'
       @_assignRegions()
+      @_assignHandlers()
       @_renderContainer(@model.get('header'), @model.get('data'))
       @
 
     onShow: ->
       if @_headerRendered and @_dataRendered
         @_setPanesSize()
-        @_removeSpinner()
+        @_stopSpinner()
       else
         @$el.spin()
 
@@ -65,7 +68,8 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
           @_hitBottom = false
 
     _assignRegions: =>
-      @tableContainer = @$('.st-table-container')[0]
+      @$tableContainer = @$('.st-table-container')
+      @tableContainer = @$tableContainer[0]
       @$tableRightViewport = @$('.st-table-right-viewport')
       @tableRightViewport = @$tableRightViewport[0]
       @tableLeftViewport = @$('.st-table-left-viewport')[0]
@@ -76,6 +80,34 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @$tablePre = @$('table.st-table-pre-render')
       @tableRightCanvas = @$('.st-table-right-canvas')[0]
       @tableLeftCanvas = @$('.st-table-left-canvas')[0]
+
+    _assignHandlers: =>
+      @$tableContainer.on 'click', '[data-order]', @_onClickSort
+
+    _onClickSort: (e) =>
+      console.log 'sort click'
+      $el = Backbone.$(e.currentTarget)
+      orderId = $el.data('order')
+      clickedDir = $el.data('order-dir')
+      sort = {}
+      unless $el.hasClass("active")
+        sort[orderId] = clickedDir
+      if e.ctrlKey
+        # first we remove from order list existing orderId sorting
+        @tableInfo.order = _(@tableInfo.order).reject((e) -> e[orderId])
+        @tableInfo.order.push(sort) if _.size(sort)
+      else
+        @tableInfo.order = [sort]
+      @_setSorting()
+      @options.app.trigger 'sort:click'
+
+    _setSorting: =>
+      @$tableContainer.find("span[data-order]")
+                      .removeClass("active")
+      _(@tableInfo.order).each((e) =>
+        pair = _.pairs(e)[0]
+        if pair.length
+          @$tableContainer.find("span[data-order=\"#{pair[0]}\"][data-order-dir=\"#{pair[1]}\"]").addClass("active"))                
 
     _calcHeader: (header, data) =>
       return false unless header and data
@@ -111,8 +143,10 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
 
     _renderContainer: (header, data) =>
       console.log 'render container'
+      @_startSpinner()
       @_renderHeader(header, data)
       @_renderData(data)
+      @_stopSpinner()
 
     _renderHeader: (header, data) =>
       return unless @headerRightColumns and !@_headerRendered
@@ -124,9 +158,10 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         @headerLeftColumns.innerHTML = renderedHeader.left
         @headerRightColumns.innerHTML = renderedHeader.right
 
+        @_setSorting()
+
         @_headerRendered = true
         @_setPanesSize()
-        @_removeSpinner()
 
     _renderData: (data) =>
       return unless @tableRightCanvas and !@_dataRendered
@@ -143,10 +178,12 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
 
         @_dataRendered = true
         @_setPanesSize()
-        @_removeSpinner()
 
-    _removeSpinner: =>
-      @$el.spin(false) if @_headerRendered and @_dataRendered
+    _stopSpinner: =>
+      @$el.spin(false)
+
+    _startSpinner: =>
+      @$el.spin(true)
       
     _setPanesSize: =>
       return unless (@el and @_headerRendered and @_dataRendered)
@@ -256,7 +293,7 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       console.log 'render table'
       html = []
       if widths
-        html.push "<tr class=\"st-table-width-row\"><th class=\"st-table-row-holder\"></td>"
+        html.push "<tr class=\"st-table-width-row\"><th class=\"st-table-row-holder\"></th>"
         for width in widths
           style = if width then " style=\"width: #{width}px;\"" else ""
           html.push("<th class=\"st-table-column-holder\"#{style}></th>")
@@ -282,20 +319,23 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @_addClass(cell, "st-table-cell")
       out.push "<td #{@_tagAttributes(cell)}>"
       out.push cell.content
-      out.push @_renderSortBlock(cell.order) if cell.order?
+      out.push @_renderSortBlock(cell.order) if cell.order
       out.push "</td>"
       out.join("")
 
     _renderSortBlock: (order) =>
       out = []
-      
+      out.push "<div class=\"st-sort-block\">"
+      out.push "<span data-order=\"#{order}\" data-order-dir=\"asc\" title=\"сортировать по возрастанию\">&#9652;</span>"
+      out.push "<span data-order=\"#{order}\" data-order-dir=\"desc\" title=\"сортировать по убыванию\">&#9662;</span>"
+      out.push "</div>"
+      out.join("")
 
     _addClass: (cell, klass) ->
       cell.class = _.compact([cell.class, klass]).join(" ")
 
     _addStyle: (cell, style) ->
       cell.style = _.compact([cell.style, style]).join("; ")
-      
 
     _tagAttributes: (data) ->
       _(data)

@@ -13,6 +13,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @listenTo options.app, 'prev-page:click', =>
         page = @table.firstPage() - 1
         if page > 0 then @getPage(page)
+      @listenTo options.app, 'sort:click', @getTable
 
       #TODO api object/service
       @pageUrl = options.pageUrl
@@ -33,6 +34,8 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       #TODO table.fetchPage with calculated url
       @table.fetch
         url: @_apiUrl(index, type)
+        data: @_infoToParams(@table.get('tableInfo') || {})
+        success: => @app.trigger 'page:loaded'
         error: -> alert("Ошибка при загрузке страницы")
         dataType: 'json'
         fetchType: type
@@ -42,3 +45,15 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         when 'table' then @table.url.replace('#{page}', '')
         else @table.url.replace('#{page}', index)
 
+    _infoToParams: (info) ->
+      order: @_orderToString(info.order)
+
+    _orderToString: (order) ->
+      _(order).map((e) ->
+                     pairs = _(e).pairs()
+                     if pairs.length
+                       if pairs[0]?[1] == 'asc'
+                         pairs[0][0]
+                       else
+                         pairs[0].join(":"))
+              .join(",")
