@@ -319,7 +319,8 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
 
     _countWidths: (head, body) =>
       console.log 'count width'
-      widths = (0 for i in [1..@_tableWidth(head)])
+      widths = (120 for i in [1..@_tableWidth(head)])
+      ###
       if head
         @$tablePre.html @_renderTable(head, @tableInfo, widths)
       @$tablePre.append @_renderTable(body, @tableInfo)
@@ -329,6 +330,7 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         .eq(0)
         .find('th.st-table-column-holder')
         .map((i, e) => @_elWidth(e))
+      ###
 
     _scrollBarWidth: =>
       return @scrollBarWidth if @scrollBarWidth
