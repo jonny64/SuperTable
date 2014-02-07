@@ -12,10 +12,10 @@ define [
     initialize: (options) ->
       _.extend @, Backbone.Events
 
-      @log "app starting version #{@version}..."
+      #console.log "app starting version #{@version}..."
 
       unless options.tableUrl
-        @log 'url is a mandatory parameter'
+        #console.log 'url is a mandatory parameter'
         return false
 
       el = options.el || 'body'

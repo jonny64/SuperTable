@@ -2,20 +2,22 @@ define ['underscore', 'backbone'], (_, Backbone) ->
   class TableModel extends Backbone.Model
     parse: (resp, options) ->
       switch options.fetchType
-        when 'table'
-          resp
+        when 'table' 
+          "data": resp
         when 'merge'
-          data: _.extend {}, @get('data'), resp.data
+          "data": resp
         when 'get'
-          data: resp.data
+          "data": resp
         else
           #console.log 'unknown fetch type'
 
     firstRow: ->
+      return 1
       return 0 unless rows = @rows()
       _.min(rows)
 
     lastRow: ->
+      return 1
       return 0 unless rows = @rows()
       _.max(rows)
 

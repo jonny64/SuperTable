@@ -30,7 +30,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @_fetchPage(index, 'get')
 
     _fetchPage: (index, type) =>
-      @log 'fetching page'
+      #console.log 'fetching page'
       @app.trigger 'page:loading'
       #TODO table.fetchPage with calculated url
       @table.fetch
@@ -38,7 +38,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         data: @_infoToParams(@table.get('tableInfo') || {})
         success: => @app.trigger 'page:loaded'
         error: -> alert("Ошибка при загрузке страницы")
-        dataType: 'json'
+        dataType: 'html'
         fetchType: type
 
     _apiUrl: (index, type) ->
