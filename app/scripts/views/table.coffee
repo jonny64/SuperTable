@@ -7,7 +7,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         fixColumns: 2
         columnWidth: 120
         borderWidth: 1
-        rowHeight: 20
+        rowHeight: 24
         width: 0
         height: 0
         rowsOnPage: 52
@@ -78,6 +78,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @tableLeftViewport = @tableContainer.querySelector(".st-table-left-viewport")
       @headerRightPane = @tableContainer.querySelector(".st-table-header-right-pane")
       @headerLeftPane = @tableContainer.querySelector(".st-table-header-left-pane")
+      @$tablePre = @$('.st-table-pre-render')
 
     _assignHandlers: =>
       @$tableContainer.on 'click', '[data-order]', @_onClickSort
@@ -276,7 +277,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       marker = 1
       _(table).chain().sort().toArray().each (row, r) ->
         _(row.data).each (cell) ->
-          firstTDIndex = template[r].indexOf(false)
+          firstTDIndex = _.indexOf(template[r], false)
           if firstTDIndex >= 0
             template[r][firstTDIndex] = {cell: cell}
             for i in [0..((parseInt(cell.rowspan, 10) || 1) - 1)]
@@ -383,18 +384,16 @@ define ['underscore', 'backbone'], (_, Backbone) ->
 
     _countWidths: (head, body) =>
       console.log 'count width'
-      widths = (120 for i in [1..@_tableWidth(head)])
-      ###
+      widths = (0 for i in [1..@_tableWidth(head)])
       if head
-        @$tablePre.html @_renderTable(head, @tableInfo, widths)
-      @$tablePre.append @_renderTable(body, @tableInfo)
+        @$tablePre.html @_renderTable(head, @tableInfo, widths).html
+      @$tablePre.append @_renderTable(body, @tableInfo).html
 
       @$tablePre
         .find('tr.st-table-width-row')
         .eq(0)
         .find('th.st-table-column-holder')
         .map((i, e) => @_elWidth(e))
-      ###
 
     _scrollBarWidth: =>
       return @scrollBarWidth if @scrollBarWidth
