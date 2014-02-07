@@ -1,4 +1,4 @@
-define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
+define ['underscore', 'backbone'], (_, Backbone) ->
   class TableView extends Backbone.View
     el: '@table-container'
     initialize: ->
@@ -30,6 +30,7 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @_hitBottom = false
         
     render: ->
+      @_scrollBarWidth()
       console.log 'render'
       @_assignRegions()
       @_assignHandlers()
@@ -68,18 +69,15 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
           @_hitBottom = false
 
     _assignRegions: =>
+      @containerWidth = @_elWidth(@el)
+      @containerHeight = @_elHeight(@el)
+      
       @$tableContainer = @$('.st-table-container')
       @tableContainer = @$tableContainer[0]
-      @$tableRightViewport = @$('.st-table-right-viewport')
-      @tableRightViewport = @$tableRightViewport[0]
-      @tableLeftViewport = @$('.st-table-left-viewport')[0]
-      @headerRightColumns = @$('.st-table-header-right-columns')[0]
-      @headerLeftColumns = @$('.st-table-header-left-columns')[0]
-      @headerRightPane = @$('.st-table-header-right-pane')[0]
-      @headerLeftPane = @$('.st-table-header-left-pane')[0]
-      @$tablePre = @$('table.st-table-pre-render')
-      @tableRightCanvas = @$('.st-table-right-canvas')[0]
-      @tableLeftCanvas = @$('.st-table-left-canvas')[0]
+      @tableRightViewport = @tableContainer.querySelector(".st-table-right-viewport")
+      @tableLeftViewport = @tableContainer.querySelector(".st-table-left-viewport")
+      @headerRightPane = @tableContainer.querySelector(".st-table-header-right-pane")
+      @headerLeftPane = @tableContainer.querySelector(".st-table-header-left-pane")
 
     _assignHandlers: =>
       @$tableContainer.on 'click', '[data-order]', @_onClickSort
@@ -149,14 +147,17 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       @_stopSpinner()
 
     _renderHeader: (header, data) =>
-      return unless @headerRightColumns and !@_headerRendered
+      return unless @tableContainer and !@_headerRendered
       console.log 'try render header'
       renderedHeader = @_calcHeader(header, data)
 
       if renderedHeader
         console.log 'insert header'
-        @headerLeftColumns.innerHTML = renderedHeader.left
-        @headerRightColumns.innerHTML = renderedHeader.right
+        @headerLeftPane.innerHTML = "<table class=\"st-header-right-columns\" style=\"table-layout: fixed;width: #{renderedHeader.left.width}px;\">#{renderedHeader.left.html}</table>"
+        @headerRightPane.innerHTML = "<table class=\"st-header-right-columns\" style=\"table-layout: fixed;width: #{renderedHeader.right.width}px;\">#{renderedHeader.right.html}</table>"
+
+        @headerRightColumns = @headerRightPane.firstElementChild
+        @headerHeight = renderedHeader.right.height
 
         @_setSorting()
 
@@ -164,17 +165,16 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
         @_setPanesSize()
 
     _renderData: (data) =>
-      return unless @tableRightCanvas and !@_dataRendered
+      return unless @tableContainer and !@_dataRendered
       console.log 'try render data'
       renderedData = @_calcData(data)
 
       if renderedData
         console.log 'insert data'
-        @tableLeftCanvas.innerHTML = renderedData.left
-        @tableRightCanvas.innerHTML = renderedData.right
+        @tableLeftViewport.innerHTML = "<table style=\"table-layout: fixed;width: #{renderedData.left.width}px;\">#{renderedData.left.html}</table>"
+        @tableRightViewport.innerHTML = "<table style=\"table-layout: fixed; width: #{renderedData.right.width}px;\">#{renderedData.right.html}</table>"
 
-        @$tableRightViewport.unbind 'scroll', @_onScroll
-        @$tableRightViewport.bind 'scroll', @_onScroll
+        @tableRightViewport.onscroll = @_onScroll
 
         @_dataRendered = true
         @_setPanesSize()
@@ -188,48 +188,47 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
     _setPanesSize: =>
       return unless (@el and @_headerRendered and @_dataRendered)
       console.log 'set panes size'
-      containerWidth = @_elWidth(@el)
-      containerHeight = @_elHeight(@el)
-      return unless (@tableInfo.width - containerWidth) + (@tableInfo.height - containerHeight)
+      return unless (@tableInfo.width - @containerWidth) + (@tableInfo.height - @containerHeight)
 
-      console.log "setting sizes for width: #{containerWidth}, height: #{containerHeight}"
-      @$('.st-table-header-column').css height: @tableInfo.headerHeight
-      @tableInfo.width = containerWidth
-      @tableInfo.height = containerHeight
-      headerHeight = @_elHeight @headerRightColumns
-      
-      fixedColumnsWidth = _(@tableInfo.widths.slice(0, @tableInfo.fixColumns)).reduce(((memo, el) -> memo + el), 0)
-      rightCanvasWidth = _(@tableInfo.widths.slice(@tableInfo.fixColumns)).reduce(((memo, el) -> memo + el), 0)
+      console.log "setting sizes for width: #{@containerWidth}, height: #{@containerHeight}"
+      @tableInfo.width = @containerWidth
+      @tableInfo.height = @containerHeight
+
+      fixedColumnsWidth = @_leftCanvasWidth()
+      rightCanvasWidth = @_rightCanvasWidth()
 
       scrollWidth = @_scrollBarWidth()
       borderWidth = @tableInfo.borderWidth
                                   
-      rightPaneWidth = _.min([containerWidth - fixedColumnsWidth, rightCanvasWidth + scrollWidth])
-      paneHeight = containerHeight - headerHeight
+      rightPaneWidth = _.min([@containerWidth - fixedColumnsWidth, rightCanvasWidth + scrollWidth])
+      paneHeight = @containerHeight - @headerHeight
 
-      @tableContainer.style.width = "#{containerWidth}px"
-      @tableContainer.style.height = "#{containerHeight}px"
+      @tableContainer.style.width = "#{@containerWidth}px"
+      @tableContainer.style.height = "#{@containerHeight}px"
 
       @headerLeftPane.style.width = "#{fixedColumnsWidth}px"
       @headerRightPane.style.left = "#{fixedColumnsWidth}px"
       @headerRightPane.style.width = "#{rightPaneWidth}px"
 
-      @tableLeftViewport.style.top = "#{headerHeight}px"
+      @tableLeftViewport.style.top = "#{@headerHeight}px"
       @tableLeftViewport.style.width = "#{fixedColumnsWidth}px"
       @tableLeftViewport.style.height = "#{paneHeight}px"
 
-      @tableRightViewport.style.top = "#{headerHeight}px"
+      @tableRightViewport.style.top = "#{@headerHeight}px"
       @tableRightViewport.style.left = "#{fixedColumnsWidth}px"
       @tableRightViewport.style.width = "#{rightPaneWidth}px"
       @tableRightViewport.style.height = "#{paneHeight}px"
 
-      @headerLeftColumns.style.width = @tableLeftCanvas.style.width = "#{fixedColumnsWidth}px"
-      @headerRightColumns.style.width = "#{rightCanvasWidth + scrollWidth + borderWidth}px"
-      @tableRightCanvas.style.width = "#{rightCanvasWidth}px"
+    _rightCanvasWidth: =>
+      _(@tableInfo.widths.slice(@tableInfo.fixColumns)).reduce(((memo, el) -> memo + el), 0)
+
+    _leftCanvasWidth: =>
+      _(@tableInfo.widths.slice(0, @tableInfo.fixColumns)).reduce(((memo, el) -> memo + el), 0)
       
     _selectCols: (table, start, num) =>
       template = @_buildTemplateTable(table)
       num = template[0].length - start unless num
+      ###
       # check if it's possible to select columns (colspan check)
       # left edge
       if start > 0
@@ -249,7 +248,7 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
           .map((e) -> e[0].marker != e[1].marker)
           .every()
           .value() then return alert("невозможно выделить пересекающиеся колонки")
-
+      ###
       _(template)
         .chain()
         .map((e) -> e.slice(start, start + num))
@@ -292,27 +291,39 @@ define ['underscore', 'backbone', 'views/page'], (_, Backbone, PageView) ->
       return unless _.isObject(table)
       console.log 'render table'
       html = []
+      totalWidth = 0
+      totalHeight = 0
       if widths
         html.push "<tr class=\"st-table-width-row\"><th class=\"st-table-row-holder\"></th>"
         for width in widths
           style = if width then " style=\"width: #{width}px;\"" else ""
+          totalWidth = totalWidth + width
           html.push("<th class=\"st-table-column-holder\"#{style}></th>")
-        html.push("<th class=\"scrollbar-place\" style=\"max-width: #{@_scrollBarWidth() + tableInfo.borderWidth}px;\"></th>") if scrollHolder
+        if scrollHolder
+          scrollBarWidth = @_scrollBarWidth() + tableInfo.borderWidth
+          totalWidth = totalWidth + scrollBarWidth
+          html.push("<th class=\"scrollbar-place\" style=\"width: #{scrollBarWidth}px;\"></th>")
         html.push "</tr>"
       _(table)
         .chain()
         .sort()
         .toArray()
         .each((row) =>
-          @_addStyle row, "height:#{row.height || tableInfo.rowHeight}px;"
+          height = parseInt(row.height, 10) || tableInfo.rowHeight
+          @_addStyle row, "height: #{height}px;"
+          totalHeight = totalHeight + height
           html.push "<tr #{@_tagAttributes(row)}>"
           html.push "<th class=\"st-table-row-holder\"></th>"
           _(row.data).each((cell) => html.push @_renderCell(cell))
           html.push("<td class=\"scrollbar-place\"></td>") if scrollHolder
           html.push "</tr>"
         )
-
-      html.join("")
+        
+      {
+        html: html.join("")
+        width: totalWidth
+        height: totalHeight
+      }
 
     _renderCell: (cell) =>
       out = []

@@ -28,9 +28,6 @@
   margin: 0
   padding: 0
 
-.st-table-container table
-  table-layout: fixed
-
 .table-pre-renderer
   position: fixed
   top: -10000px
@@ -40,7 +37,7 @@
   overflow: hidden
 
 table.st-table-pre-render
-  table-layout: auto
+  table-layout: fixed
   border-collapse: collapse
 
 .st-table-pre-render table, tr, td, th
@@ -65,11 +62,13 @@ table.st-table-pre-render
   top: 0
   
 .st-table-header-left-columns
+  table-layout: fixed
   border-collapse: collapse
   position: relative
   overflow: hidden
 
 .st-table-header-right-columns
+  table-layout: fixed
   border-collapse: collapse
   position: relative
   overflow: hidden
@@ -94,15 +93,19 @@ table.st-table-pre-render
   overflow-x: scroll
 
 .st-table-left-canvas
+  table-layout: fixed
   border-collapse: collapse
 
 .st-table-right-canvas
+  table-layout: fixed
   border-collapse: collapse
 
 .st-table-row
+  display: table-row
   height: 19px
 
 .st-table-cell
+  display: table-cell
   white-space: nowrap
   padding: 0 4px
   border: 1px solid #dddddd
