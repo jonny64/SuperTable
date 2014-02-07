@@ -112,32 +112,23 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       console.log 'calc header'
       @tableInfo.widths = @_countWidths(header, data)
       leftWidths = @tableInfo.widths.slice(0, @tableInfo.fixColumns)
-      rightWidths = @tableInfo.widths.slice(@tableInfo.fixColumns) 
+      rightWidths = @tableInfo.widths.slice(@tableInfo.fixColumns)
 
-      left: @_renderTable(
-        @_selectCols(header, 0, @tableInfo.fixColumns),
-        @tableInfo,
-        leftWidths)
-      right: @_renderTable(
-        @_selectCols(header, @tableInfo.fixColumns),
-        @tableInfo,
-        rightWidths,
-        true)
+      split = @_splitTable(header)
+
+      left: @_renderTable(split.left, @tableInfo, leftWidths)
+      right: @_renderTable(split.right, @tableInfo, rightWidths, true)
 
     _calcData: (data) =>
       return false unless @tableInfo.widths and data
       console.log 'calc data'
       leftWidths = @tableInfo.widths.slice(0, @tableInfo.fixColumns)
       rightWidths = @tableInfo.widths.slice(@tableInfo.fixColumns)
+
+      split = @_splitTable(data)
       
-      left: @_renderTable(
-        @_selectCols(data, 0, @tableInfo.fixColumns),
-        @tableInfo,
-        leftWidths)
-      right: @_renderTable(
-        @_selectCols(data, @tableInfo.fixColumns),
-        @tableInfo,
-        rightWidths)
+      left: @_renderTable(split.left, @tableInfo, leftWidths)
+      right: @_renderTable(split.right, @tableInfo, rightWidths)
 
     _renderContainer: (header, data) =>
       console.log 'render container'
@@ -225,67 +216,24 @@ define ['underscore', 'backbone'], (_, Backbone) ->
     _leftCanvasWidth: =>
       _(@tableInfo.widths.slice(0, @tableInfo.fixColumns)).reduce(((memo, el) -> memo + el), 0)
       
-    _selectCols: (table, start, num) =>
-      template = @_buildTemplateTable(table)
-      num = template[0].length - start unless num
-      ###
-      # check if it's possible to select columns (colspan check)
-      # left edge
-      if start > 0
-        unless _(template)
-          .chain()
-          .map((e) -> e.slice(start - 1, start + 1)) # slice previous and
-                                             # first columns
-          .map((e) -> e[0].marker != e[1].marker) # they should be different
-          .every()                           # all of them
-          .value() then return alert("невозможно выделить пересекающиеся колонки")
-          
-      #right edge
-      if ((start + num) < template[0].length)
-        unless _(template)
-          .chain()
-          .map((e) -> e.slice(start + num - 1, start + num + 1))
-          .map((e) -> e[0].marker != e[1].marker)
-          .every()
-          .value() then return alert("невозможно выделить пересекающиеся колонки")
-      ###
-      _(template)
-        .chain()
-        .map((e) -> e.slice(start, start + num))
-        .map((e, index) -> [index + 1, data: _(e)
-                                               .chain()
-                                               .filter((cell) -> cell.cell)
-                                               .map((e) -> e.cell)
-                                               .value()])
-        .object()
-        .value()
-        
-    _selectRows: (table, start, num) =>
+    _splitTable: (data) =>
+      left = {}
+      right = {}
+      _(data).chain()
+             .each((val, row) ->
+               left[row] = {"data": []}
+               right[row] = {"data": []}
+               _(val.data).each((cell, index) ->
+                 if cell.class == "freezbar-cell"
+                   right[row]["data"] = val.data.slice(index+1)
+                  else
+                   left[row]["data"].push(cell)))
 
-    _templateCache: {}
-    
-    _buildTemplateTable: (table) ->
-      key = JSON.stringify(table)
-      if @_templateCache[key]
-        console.log 'hit template cache'
-        return @_templateCache[key]
-      console.log 'build template table'
-      tableWidth = @_tableWidth(table)
-      tableHeight = @_tableHeight(table)
-      template = ((false for i in [1..tableWidth]) for j in [1..tableHeight])
-      marker = 1
-      _(table).chain().sort().toArray().each (row, r) ->
-        _(row.data).each (cell) ->
-          firstTDIndex = template[r].indexOf(false)
-          if firstTDIndex >= 0
-            template[r][firstTDIndex] = {cell: cell}
-            for i in [0..((parseInt(cell.rowspan, 10) || 1) - 1)]
-              for j in [0..((parseInt(cell.colspan, 10) || 1) - 1)]
-                template[r + i][firstTDIndex + j] ||= {}
-                template[r + i][firstTDIndex + j].marker = marker
-            marker = marker + 1
-      @_templateCache[key] = template
-      template
+      {
+        left: left,
+        right: right
+      }
+
 
     _renderTable: (table, tableInfo, widths, scrollHolder=false) =>
       return unless _.isObject(table)
