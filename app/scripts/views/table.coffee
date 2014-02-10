@@ -15,6 +15,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         order: [{"id270":"asc"}]
 
       @model.set 'tableInfo', @tableInfo
+      @log = @options.app.log
       @listenTo @options.app, 'page:loading', @_startSpinner
       @listenTo @options.app, 'page:loaded', @_stopSpinner
       @listenTo @model, 'change:data', (model, val) =>
@@ -31,7 +32,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         
     render: ->
       @_scrollBarWidth()
-      console.log 'render'
+      @log 'render'
       @_assignRegions()
       @_assignHandlers()
       @_renderContainer(@model.get('header'), @model.get('data'))
@@ -84,7 +85,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @$tableContainer.on 'click', '[data-order]', @_onClickSort
 
     _onClickSort: (e) =>
-      console.log 'sort click'
+      @log 'sort click'
       $el = Backbone.$(e.currentTarget)
       orderId = $el.data('order')
       clickedDir = $el.data('order-dir')
@@ -110,7 +111,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
 
     _calcHeader: (header, data) =>
       return false unless header and data
-      console.log 'calc header'
+      @log 'calc header'
       @tableInfo.widths = @_countWidths(header, data)
       leftWidths = @tableInfo.widths.slice(0, @tableInfo.fixColumns)
       rightWidths = @tableInfo.widths.slice(@tableInfo.fixColumns) 
@@ -127,7 +128,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
 
     _calcData: (data) =>
       return false unless @tableInfo.widths and data
-      console.log 'calc data'
+      @log 'calc data'
       leftWidths = @tableInfo.widths.slice(0, @tableInfo.fixColumns)
       rightWidths = @tableInfo.widths.slice(@tableInfo.fixColumns)
       
@@ -141,7 +142,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         rightWidths)
 
     _renderContainer: (header, data) =>
-      console.log 'render container'
+      @log 'render container'
       @_startSpinner()
       @_renderHeader(header, data)
       @_renderData(data)
@@ -149,11 +150,11 @@ define ['underscore', 'backbone'], (_, Backbone) ->
 
     _renderHeader: (header, data) =>
       return unless @tableContainer and !@_headerRendered
-      console.log 'try render header'
+      @log 'try render header'
       renderedHeader = @_calcHeader(header, data)
 
       if renderedHeader
-        console.log 'insert header'
+        @log 'insert header'
         @headerLeftPane.innerHTML = "<table class=\"st-header-right-columns\" style=\"table-layout: fixed;width: #{renderedHeader.left.width}px;\">#{renderedHeader.left.html}</table>"
         @headerRightPane.innerHTML = "<table class=\"st-header-right-columns\" style=\"table-layout: fixed;width: #{renderedHeader.right.width}px;\">#{renderedHeader.right.html}</table>"
 
@@ -167,11 +168,11 @@ define ['underscore', 'backbone'], (_, Backbone) ->
 
     _renderData: (data) =>
       return unless @tableContainer and !@_dataRendered
-      console.log 'try render data'
+      @log 'try render data'
       renderedData = @_calcData(data)
 
       if renderedData
-        console.log 'insert data'
+        @log 'insert data'
         @tableLeftViewport.innerHTML = "<table style=\"table-layout: fixed;width: #{renderedData.left.width}px;\">#{renderedData.left.html}</table>"
         @tableRightViewport.innerHTML = "<table style=\"table-layout: fixed; width: #{renderedData.right.width}px;\">#{renderedData.right.html}</table>"
 
@@ -188,10 +189,10 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       
     _setPanesSize: =>
       return unless (@el and @_headerRendered and @_dataRendered)
-      console.log 'set panes size'
+      @log 'set panes size'
       return unless (@tableInfo.width - @containerWidth) + (@tableInfo.height - @containerHeight)
 
-      console.log "setting sizes for width: #{@containerWidth}, height: #{@containerHeight}"
+      @log "setting sizes for width: #{@containerWidth}, height: #{@containerHeight}"
       @tableInfo.width = @containerWidth
       @tableInfo.height = @containerHeight
 
@@ -268,9 +269,9 @@ define ['underscore', 'backbone'], (_, Backbone) ->
     _buildTemplateTable: (table) ->
       key = JSON.stringify(table)
       if @_templateCache[key]
-        console.log 'hit template cache'
+        @log 'hit template cache'
         return @_templateCache[key]
-      console.log 'build template table'
+      @log 'build template table'
       tableWidth = @_tableWidth(table)
       tableHeight = @_tableHeight(table)
       template = ((false for i in [1..tableWidth]) for j in [1..tableHeight])
@@ -290,7 +291,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
 
     _renderTable: (table, tableInfo, widths, scrollHolder=false) =>
       return unless _.isObject(table)
-      console.log 'render table'
+      @log 'render table'
       html = []
       totalWidth = 0
       totalHeight = 0
@@ -383,7 +384,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       Math.max obj.clientHeight, obj.offsetHeight, obj.scrollHeight
 
     _countWidths: (head, body) =>
-      console.log 'count width'
+      @log 'count width'
       widths = (0 for i in [1..@_tableWidth(head)])
       if head
         @$tablePre.html @_renderTable(head, @tableInfo, widths).html
