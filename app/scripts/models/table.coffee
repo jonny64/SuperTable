@@ -9,7 +9,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         when 'get'
           data: resp.data
         else
-          console.log 'unknown fetch type'
+          #console.log 'unknown fetch type'
 
     firstRow: ->
       return 0 unless rows = @rows()

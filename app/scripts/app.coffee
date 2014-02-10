@@ -8,13 +8,14 @@ define [
 
   class App
     version: '0.1.2'
+    log: (msg) -> window.console?.log?(msg)
     initialize: (options) ->
       _.extend @, Backbone.Events
 
-      console.log "app starting version #{@version}..."
+      @log "app starting version #{@version}..."
 
       unless options.tableUrl
-        console.log 'url is a mandatory parameter'
+        @log 'url is a mandatory parameter'
         return false
 
       el = options.el || 'body'

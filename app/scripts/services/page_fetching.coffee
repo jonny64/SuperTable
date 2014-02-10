@@ -4,6 +4,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       _.extend @, Backbone.Events
 
       @app = options.app
+      @log = options.app.log
       @listenTo options.app, 'more-button:click', =>
         page = @table.lastPage() + 1
         if page <= @table.totalPages() then @mergePage(page)
@@ -29,7 +30,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @_fetchPage(index, 'get')
 
     _fetchPage: (index, type) =>
-      console.log 'fetching page'
+      @log 'fetching page'
       @app.trigger 'page:loading'
       #TODO table.fetchPage with calculated url
       @table.fetch
