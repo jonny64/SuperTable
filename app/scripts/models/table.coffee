@@ -1,38 +1,25 @@
 define ['underscore', 'backbone'], (_, Backbone) ->
   class TableModel extends Backbone.Model
     parse: (resp, options) ->
-      switch options.fetchType
-        when 'table'
-          resp
-        when 'merge'
-          data: _.extend {}, @get('data'), resp.data
-        when 'get'
-          data: resp.data
-        else
-          #console.log 'unknown fetch type'
+      if @get('fetchType') == 'mergePage'
+        resp.start = '' + @start()
+        resp.cnt = '' + (@cnt() + parseInt(resp.cnt, 10))
+      resp
 
-    firstRow: ->
-      return 0 unless rows = @rows()
-      _.min(rows)
-
-    lastRow: ->
-      return 0 unless rows = @rows()
-      _.max(rows)
-
-    rows: ->
-      return false unless (data = @get('data'))
-      _(data).chain()
-             .keys()
-             .map((e) -> parseInt(e, 10))
-             .value()
-      
     lastPage: =>
-      Math.ceil(@lastRow() / @get('tableInfo').rowsOnPage)
+      @total() - @cnt() <= @start()
 
     firstPage: =>
-      Math.ceil(@firstRow() / @get('tableInfo').rowsOnPage)
+      !@start()
 
-    totalPages: =>
-      tableInfo = @get('tableInfo')
-      return 0 unless tableInfo and tableInfo.totalRows and tableInfo.rowsOnPage
-      Math.floor tableInfo.totalRows / tableInfo.rowsOnPage
+    nextPage: =>
+      @start() + @portion()
+
+    prevPage: =>
+      @start() - @portion()
+
+    start: => parseInt(@get('start'), 10)
+    portion: => parseInt(@get('portion'), 10)
+    cnt: => parseInt(@get('cnt'), 10)
+    total: => parseInt(@get('total'), 10)
+

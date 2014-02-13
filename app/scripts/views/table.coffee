@@ -1,49 +1,61 @@
-define ['underscore', 'backbone'], (_, Backbone) ->
+define [
+  'underscore',
+  'backbone',
+  'services/split_table',
+  'services/sorting'
+  ], (_, Backbone, SplitTable, Sorting) ->
   class TableView extends Backbone.View
     el: '@table-container'
     initialize: ->
-      @tableInfo =
-        fixHeader: true
-        fixColumns: 2
+      @tableDefaults =
         columnWidth: 120
         borderWidth: 1
         rowHeight: 24
         width: 0
         height: 0
-        rowsOnPage: 52
-        totalRows: 156
-        order: [{"id270":"asc"}]
 
-      @model.set 'tableInfo', @tableInfo
       @log = @options.app.log
       @listenTo @options.app, 'page:loading', @_startSpinner
       @listenTo @options.app, 'page:loaded', @_stopSpinner
-      @listenTo @model, 'change:data', (model, val) =>
-        @_dataRendered = false
-        @_headerRendered = false if 'header' in model.changed
-        @_renderContainer(model.get('header'), model.get('data'))
+      @listenTo @model, 'change', (model) =>
+        if model.changed.data
+          @_renderContainer(model.get('data'))
 
       @prevScrollTop = 0
       @prevScrollLeft = 0
-      @_headerRendered = false
-      @_dataRendered = false
-      
+      @_tableRendered = false
+      @_regionsAssigned = false
       @_hitBottom = false
-        
+
     render: ->
-      @_scrollBarWidth()
       @log 'render'
-      @_assignRegions()
-      @_assignHandlers()
-      @_renderContainer(@model.get('header'), @model.get('data'))
+      @_scrollBarWidth()
+      @_assignRegions() unless @_regionsAssigned
+      html = @model.get('data')
+      @_renderContainer(html) if html
       @
 
     onShow: ->
-      if @_headerRendered and @_dataRendered
+      if @_tableRendered
         @_setPanesSize()
         @_stopSpinner()
       else
         @$el.spin()
+
+    _assignRegions: =>
+      return if @_regionsAssigned
+      @containerWidth = @$el.width()
+      @containerHeight = @$el.height()
+
+      @$tableContainer = @$('.st-table-container')
+      @tableContainer = @$tableContainer[0]
+      @tableRightViewport = @tableContainer.querySelector(".st-table-right-viewport")
+      @tableLeftViewport = @tableContainer.querySelector(".st-table-left-viewport")
+      @headerRightPane = @tableContainer.querySelector(".st-table-header-right-pane")
+      @headerLeftPane = @tableContainer.querySelector(".st-table-header-left-pane")
+      @leftSorter = @_makeSortable(@headerLeftPane)
+      @rightSorter = @_makeSortable(@headerRightPane)
+      @_regionsAssigned = true
 
     _onScroll: (e) =>
       return unless @tableRightViewport
@@ -62,146 +74,72 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       if vScroll
         @tableLeftViewport.scrollTop = scrollTop
 
-        if (scrollTop + @tableRightViewport.clientHeight) >= @_elHeight(@tableRightViewport)
+        if (scrollTop + @tableRightViewport.clientHeight) >= @tableRightViewport.scrollHeight
           @options.app.trigger 'scroll:bottom'
           @_hitBottom = true
         else if @_hitBottom
           @options.app.trigger 'scroll'
           @_hitBottom = false
 
-    _assignRegions: =>
-      @containerWidth = @_elWidth(@el)
-      @containerHeight = @_elHeight(@el)
-      
-      @$tableContainer = @$('.st-table-container')
-      @tableContainer = @$tableContainer[0]
-      @tableRightViewport = @tableContainer.querySelector(".st-table-right-viewport")
-      @tableLeftViewport = @tableContainer.querySelector(".st-table-left-viewport")
-      @headerRightPane = @tableContainer.querySelector(".st-table-header-right-pane")
-      @headerLeftPane = @tableContainer.querySelector(".st-table-header-left-pane")
-      @$tablePre = @$('.st-table-pre-render')
-
-    _assignHandlers: =>
-      @$tableContainer.on 'click', '[data-order]', @_onClickSort
-
-    _onClickSort: (e) =>
-      @log 'sort click'
-      $el = Backbone.$(e.currentTarget)
-      orderId = $el.data('order')
-      clickedDir = $el.data('order-dir')
-      sort = {}
-      unless $el.hasClass("active")
-        sort[orderId] = clickedDir
-      if e.ctrlKey
-        # first we remove from order list existing orderId sorting
-        @tableInfo.order = _(@tableInfo.order).reject((e) -> e[orderId])
-        @tableInfo.order.push(sort) if _.size(sort)
-      else
-        @tableInfo.order = [sort]
-      @_setSorting()
-      @options.app.trigger 'sort:click'
-
-    _setSorting: =>
-      @$tableContainer.find("span[data-order]")
-                      .removeClass("active")
-      _(@tableInfo.order).each((e) =>
-        pair = _.pairs(e)[0]
-        if pair.length
-          @$tableContainer.find("span[data-order=\"#{pair[0]}\"][data-order-dir=\"#{pair[1]}\"]").addClass("active"))                
-
-    _calcHeader: (header, data) =>
-      return false unless header and data
-      @log 'calc header'
-      @tableInfo.widths = @_countWidths(header, data)
-      leftWidths = @tableInfo.widths.slice(0, @tableInfo.fixColumns)
-      rightWidths = @tableInfo.widths.slice(@tableInfo.fixColumns) 
-
-      left: @_renderTable(
-        @_selectCols(header, 0, @tableInfo.fixColumns),
-        @tableInfo,
-        leftWidths)
-      right: @_renderTable(
-        @_selectCols(header, @tableInfo.fixColumns),
-        @tableInfo,
-        rightWidths,
-        true)
-
-    _calcData: (data) =>
-      return false unless @tableInfo.widths and data
-      @log 'calc data'
-      leftWidths = @tableInfo.widths.slice(0, @tableInfo.fixColumns)
-      rightWidths = @tableInfo.widths.slice(@tableInfo.fixColumns)
-      
-      left: @_renderTable(
-        @_selectCols(data, 0, @tableInfo.fixColumns),
-        @tableInfo,
-        leftWidths)
-      right: @_renderTable(
-        @_selectCols(data, @tableInfo.fixColumns),
-        @tableInfo,
-        rightWidths)
-
-    _renderContainer: (header, data) =>
+    _renderContainer: (data) =>
+      return unless data
       @log 'render container'
       @_startSpinner()
-      @_renderHeader(header, data)
-      @_renderData(data)
+
+      tables = new SplitTable(data, @tableDefaults, @model)
+
+      @log 'insert header'
+      if tables.top.left
+        @headerLeftPane.innerHTML = ''
+        @headerLeftPane.appendChild tables.top.left
+        @headerLeftColumns = @headerLeftPane.querySelector('table')
+        @leftWidth = @_elWidth(@headerLeftColumns)
+        @leftSorter.insertSortBlocks()
+
+      if tables.top.right
+        @headerRightPane.innerHTML = ''
+        @headerRightPane.appendChild tables.top.right if tables.top.right
+        @headerRightColumns = @headerRightPane.querySelector('table')
+        @rightWidth = @_elWidth(@headerRightColumns)
+        @headerHeight = tables.top.height
+        @rightSorter.insertSortBlocks()
+
+      @log 'insert data'
+      if @model.get('fetchType') == 'page'
+        @tableLeftViewport.innerHTML = ''
+        @tableRightViewport.innerHTML = ''
+      @tableLeftViewport.appendChild tables.bottom.left
+      @tableRightViewport.appendChild tables.bottom.right
+
+      @tableRightViewport.onscroll = @_onScroll
+
+      @_tableRendered = true
+      @_setPanesSize()
       @_stopSpinner()
 
-    _renderHeader: (header, data) =>
-      return unless @tableContainer and !@_headerRendered
-      @log 'try render header'
-      renderedHeader = @_calcHeader(header, data)
-
-      if renderedHeader
-        @log 'insert header'
-        @headerLeftPane.innerHTML = "<table class=\"st-header-right-columns\" style=\"table-layout: fixed;width: #{renderedHeader.left.width}px;\">#{renderedHeader.left.html}</table>"
-        @headerRightPane.innerHTML = "<table class=\"st-header-right-columns\" style=\"table-layout: fixed;width: #{renderedHeader.right.width}px;\">#{renderedHeader.right.html}</table>"
-
-        @headerRightColumns = @headerRightPane.firstElementChild
-        @headerHeight = renderedHeader.right.height
-
-        @_setSorting()
-
-        @_headerRendered = true
-        @_setPanesSize()
-
-    _renderData: (data) =>
-      return unless @tableContainer and !@_dataRendered
-      @log 'try render data'
-      renderedData = @_calcData(data)
-
-      if renderedData
-        @log 'insert data'
-        @tableLeftViewport.innerHTML = "<table style=\"table-layout: fixed;width: #{renderedData.left.width}px;\">#{renderedData.left.html}</table>"
-        @tableRightViewport.innerHTML = "<table style=\"table-layout: fixed; width: #{renderedData.right.width}px;\">#{renderedData.right.html}</table>"
-
-        @tableRightViewport.onscroll = @_onScroll
-
-        @_dataRendered = true
-        @_setPanesSize()
+    _makeSortable: (container) =>
+      new Sorting(app: @options.app, model: @model, container: container)
 
     _stopSpinner: =>
       @$el.spin(false)
 
     _startSpinner: =>
       @$el.spin(true)
-      
+
     _setPanesSize: =>
-      return unless (@el and @_headerRendered and @_dataRendered)
       @log 'set panes size'
-      return unless (@tableInfo.width - @containerWidth) + (@tableInfo.height - @containerHeight)
+      return unless (@tableDefaults.width - @containerWidth) + (@tableDefaults.height - @containerHeight)
 
       @log "setting sizes for width: #{@containerWidth}, height: #{@containerHeight}"
-      @tableInfo.width = @containerWidth
-      @tableInfo.height = @containerHeight
+      @tableDefaults.width = @containerWidth
+      @tableDefaults.height = @containerHeight
 
-      fixedColumnsWidth = @_leftCanvasWidth()
-      rightCanvasWidth = @_rightCanvasWidth()
+      fixedColumnsWidth = @leftWidth
+      rightCanvasWidth = @rightWidth
 
       scrollWidth = @_scrollBarWidth()
-      borderWidth = @tableInfo.borderWidth
-                                  
+      borderWidth = @tableDefaults.borderWidth
+
       rightPaneWidth = _.min([@containerWidth - fixedColumnsWidth, rightCanvasWidth + scrollWidth])
       paneHeight = @containerHeight - @headerHeight
 
@@ -221,181 +159,6 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @tableRightViewport.style.width = "#{rightPaneWidth}px"
       @tableRightViewport.style.height = "#{paneHeight}px"
 
-    _rightCanvasWidth: =>
-      _(@tableInfo.widths.slice(@tableInfo.fixColumns)).reduce(((memo, el) -> memo + el), 0)
-
-    _leftCanvasWidth: =>
-      _(@tableInfo.widths.slice(0, @tableInfo.fixColumns)).reduce(((memo, el) -> memo + el), 0)
-      
-    _selectCols: (table, start, num) =>
-      template = @_buildTemplateTable(table)
-      num = template[0].length - start unless num
-      ###
-      # check if it's possible to select columns (colspan check)
-      # left edge
-      if start > 0
-        unless _(template)
-          .chain()
-          .map((e) -> e.slice(start - 1, start + 1)) # slice previous and
-                                             # first columns
-          .map((e) -> e[0].marker != e[1].marker) # they should be different
-          .every()                           # all of them
-          .value() then return alert("невозможно выделить пересекающиеся колонки")
-          
-      #right edge
-      if ((start + num) < template[0].length)
-        unless _(template)
-          .chain()
-          .map((e) -> e.slice(start + num - 1, start + num + 1))
-          .map((e) -> e[0].marker != e[1].marker)
-          .every()
-          .value() then return alert("невозможно выделить пересекающиеся колонки")
-      ###
-      _(template)
-        .chain()
-        .map((e) -> e.slice(start, start + num))
-        .map((e, index) -> [index + 1, data: _(e)
-                                               .chain()
-                                               .filter((cell) -> cell.cell)
-                                               .map((e) -> e.cell)
-                                               .value()])
-        .object()
-        .value()
-        
-    _selectRows: (table, start, num) =>
-
-    _templateCache: {}
-    
-    _buildTemplateTable: (table) ->
-      key = JSON.stringify(table)
-      if @_templateCache[key]
-        @log 'hit template cache'
-        return @_templateCache[key]
-      @log 'build template table'
-      tableWidth = @_tableWidth(table)
-      tableHeight = @_tableHeight(table)
-      template = ((false for i in [1..tableWidth]) for j in [1..tableHeight])
-      marker = 1
-      _(table).chain().sort().toArray().each (row, r) ->
-        _(row.data).each (cell) ->
-          firstTDIndex = _.indexOf(template[r], false)
-          if firstTDIndex >= 0
-            template[r][firstTDIndex] = {cell: cell}
-            for i in [0..((parseInt(cell.rowspan, 10) || 1) - 1)]
-              for j in [0..((parseInt(cell.colspan, 10) || 1) - 1)]
-                template[r + i][firstTDIndex + j] ||= {}
-                template[r + i][firstTDIndex + j].marker = marker
-            marker = marker + 1
-      @_templateCache[key] = template
-      template
-
-    _renderTable: (table, tableInfo, widths, scrollHolder=false) =>
-      return unless _.isObject(table)
-      @log 'render table'
-      html = []
-      totalWidth = 0
-      totalHeight = 0
-      if widths
-        html.push "<tr class=\"st-table-width-row\"><th class=\"st-table-row-holder\"></th>"
-        for width in widths
-          style = if width then " style=\"width: #{width}px;\"" else ""
-          totalWidth = totalWidth + width
-          html.push("<th class=\"st-table-column-holder\"#{style}></th>")
-        if scrollHolder
-          scrollBarWidth = @_scrollBarWidth() + tableInfo.borderWidth
-          totalWidth = totalWidth + scrollBarWidth
-          html.push("<th class=\"scrollbar-place\" style=\"width: #{scrollBarWidth}px;\"></th>")
-        html.push "</tr>"
-      _(table)
-        .chain()
-        .sort()
-        .toArray()
-        .each((row) =>
-          height = parseInt(row.height, 10) || tableInfo.rowHeight
-          @_addStyle row, "height: #{height}px;"
-          totalHeight = totalHeight + height
-          html.push "<tr #{@_tagAttributes(row)}>"
-          html.push "<th class=\"st-table-row-holder\"></th>"
-          _(row.data).each((cell) => html.push @_renderCell(cell))
-          html.push("<td class=\"scrollbar-place\"></td>") if scrollHolder
-          html.push "</tr>"
-        )
-        
-      {
-        html: html.join("")
-        width: totalWidth
-        height: totalHeight
-      }
-
-    _renderCell: (cell) =>
-      out = []
-      @_addClass(cell, "st-table-cell")
-      out.push "<td #{@_tagAttributes(cell)}>"
-      out.push cell.content
-      out.push @_renderSortBlock(cell.order) if cell.order
-      out.push "</td>"
-      out.join("")
-
-    _renderSortBlock: (order) =>
-      out = []
-      out.push "<div class=\"st-sort-block\">"
-      out.push "<span data-order=\"#{order}\" data-order-dir=\"asc\" title=\"сортировать по возрастанию\">&#9652;</span>"
-      out.push "<span data-order=\"#{order}\" data-order-dir=\"desc\" title=\"сортировать по убыванию\">&#9662;</span>"
-      out.push "</div>"
-      out.join("")
-
-    _addClass: (cell, klass) ->
-      cell.class = _.compact([cell.class, klass]).join(" ")
-
-    _addStyle: (cell, style) ->
-      cell.style = _.compact([cell.style, style]).join("; ")
-
-    _tagAttributes: (data) ->
-      _(data)
-        .chain()
-        .map((val, key) ->
-          "#{key}=\"#{val}\"" unless key in ['data', 'content'])
-        .compact()
-        .value()
-        .join(" ")
-
-    _firstRow: (table) ->
-      minIndex = _(table).chain()
-              .keys()
-              .map((k) -> parseInt(k, 10))
-              .min()
-              .value()
-      table[minIndex]
-      
-    _tableWidth: (table) =>
-      return unless _.isObject(table)
-      width = 0
-      _(@_firstRow(table).data).each (cell) ->
-        width = width + (if cell.colspan then parseInt(cell.colspan, 10) else 1)
-      width
-
-    _tableHeight: (table) ->
-      _(table).size()
-        
-    _elWidth: (obj) ->
-      Math.max obj.clientWidth, obj.offsetWidth, obj.scrollWidth
-
-    _elHeight: (obj) ->
-      Math.max obj.clientHeight, obj.offsetHeight, obj.scrollHeight
-
-    _countWidths: (head, body) =>
-      @log 'count width'
-      widths = (0 for i in [1..@_tableWidth(head)])
-      if head
-        @$tablePre.html @_renderTable(head, @tableInfo, widths).html
-      @$tablePre.append @_renderTable(body, @tableInfo).html
-
-      @$tablePre
-        .find('tr.st-table-width-row')
-        .eq(0)
-        .find('th.st-table-column-holder')
-        .map((i, e) => @_elWidth(e))
-
     _scrollBarWidth: =>
       return @scrollBarWidth if @scrollBarWidth
       div = document.createElement('div')
@@ -405,3 +168,6 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       width = div.offsetWidth - div.clientWidth
       document.body.removeChild(div)
       @scrollBarWidth = width
+
+    _elWidth: (obj) ->
+      Math.max obj.clientWidth, obj.offsetWidth, obj.scrollWidth

@@ -7,10 +7,10 @@ define ['backbone', 'templates/header'], (Backbone, template) ->
       'click @prev-page': '_onClickPrev'
 
     initialize: ->
-      @listenTo @model, 'change:data', =>
+      @listenTo @model, 'change', =>
         @renderBindVals()
       @listenTo @options.app, 'scroll:bottom', =>
-        @_enableMore() if @model.lastPage() < @model.totalPages()
+        @_enableMore() unless @model.lastPage()
       @listenTo @options.app, 'scroll', @_disableMore
 
     render: ->
@@ -20,16 +20,13 @@ define ['backbone', 'templates/header'], (Backbone, template) ->
       @
 
     renderBindVals: =>
-      @$firstRow.html(firstRow = @model.firstRow() || '?')
-      @$lastRow.html(lastRow = @model.lastRow() || '?')
-      @$totalRows.html(totalRows = @model.get('tableInfo')?.totalRows || '?')
+      @$firstRow.html(@model.start() + 1 || '?')
+      @$lastRow.html(@model.start() + @model.cnt() || '?')
+      @$totalRows.html(@model.total() || '?')
 
-      if firstRow > 1 then @enablePrev() else @disablePrev()
-      if lastRow < totalRows
-        @enableNext()
-      else
-        @disableNext()
-      
+      if !@model.firstPage() then @enablePrev() else @disablePrev()
+      if !@model.lastPage() then @enableNext() else @disableNext()
+
     _assignUi: ->
       @$moreButton = @$('@more-button')
       @$nextPage = @$('@next-page')
@@ -37,7 +34,7 @@ define ['backbone', 'templates/header'], (Backbone, template) ->
       @$firstRow = @$('@first-row')
       @$lastRow = @$('@last-row')
       @$totalRows = @$('@total-rows')
-      
+
     _onClickMore: (e) ->
       return e.preventDefault() if @$moreButton.hasClass('disabled')
       @_disableMore()
