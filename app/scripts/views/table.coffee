@@ -1,4 +1,9 @@
-define ['underscore', 'backbone', 'services/split_table'], (_, Backbone, SplitTable) ->
+define [
+  'underscore',
+  'backbone',
+  'services/split_table',
+  'services/sorting'
+  ], (_, Backbone, SplitTable, Sorting) ->
   class TableView extends Backbone.View
     el: '@table-container'
     initialize: ->
@@ -15,19 +20,17 @@ define ['underscore', 'backbone', 'services/split_table'], (_, Backbone, SplitTa
       @listenTo @model, 'change', (model) =>
         if model.changed.data
           @_renderContainer(model.get('data'))
-        else
-          @_setSorting() if model.changed.order
 
       @prevScrollTop = 0
       @prevScrollLeft = 0
       @_tableRendered = false
+      @_regionsAssigned = false
       @_hitBottom = false
 
     render: ->
       @log 'render'
       @_scrollBarWidth()
-      @_assignRegions()
-      @_assignHandlers()
+      @_assignRegions() unless @_regionsAssigned
       html = @model.get('data')
       @_renderContainer(html) if html
       @
@@ -40,6 +43,7 @@ define ['underscore', 'backbone', 'services/split_table'], (_, Backbone, SplitTa
         @$el.spin()
 
     _assignRegions: =>
+      return if @_regionsAssigned
       @containerWidth = @$el.width()
       @containerHeight = @$el.height()
 
@@ -49,9 +53,9 @@ define ['underscore', 'backbone', 'services/split_table'], (_, Backbone, SplitTa
       @tableLeftViewport = @tableContainer.querySelector(".st-table-left-viewport")
       @headerRightPane = @tableContainer.querySelector(".st-table-header-right-pane")
       @headerLeftPane = @tableContainer.querySelector(".st-table-header-left-pane")
-
-    _assignHandlers: =>
-      @$tableContainer.on 'click', '[data-order]', @_onClickSort
+      @leftSorter = @_makeSortable(@headerLeftPane)
+      @rightSorter = @_makeSortable(@headerRightPane)
+      @_regionsAssigned = true
 
     _onScroll: (e) =>
       return unless @tableRightViewport
@@ -77,28 +81,6 @@ define ['underscore', 'backbone', 'services/split_table'], (_, Backbone, SplitTa
           @options.app.trigger 'scroll'
           @_hitBottom = false
 
-    _onClickSort: (e) =>
-      @log 'sort click'
-      $el = Backbone.$(e.currentTarget)
-      orderId = $el.data('order')
-      clickedDir = $el.data('order-dir')
-      sort = {}
-      unless $el.hasClass("active")
-        sort[orderId] = clickedDir
-      if e.ctrlKey
-        # first we remove from order list existing orderId sorting
-        #@model.get('order') = _(@model.get('order')).reject((e) -> e[orderId])
-        #@model.get('order').push(sort) if _.size(sort)
-      else
-        @tableInfo.order = [sort]
-      @_setSorting()
-      @options.app.trigger 'sort:click'
-
-    _setSorting: =>
-      @$tableContainer.find("span.sortable").removeClass("active")
-      _(@model.get('order')).each((id, dir) =>
-        @$tableContainer.find("span#{id}[data-order-dir=\"#{dir}\"]").addClass("active"))
-
     _renderContainer: (data) =>
       return unless data
       @log 'render container'
@@ -112,6 +94,7 @@ define ['underscore', 'backbone', 'services/split_table'], (_, Backbone, SplitTa
         @headerLeftPane.appendChild tables.top.left
         @headerLeftColumns = @headerLeftPane.querySelector('table')
         @leftWidth = @_elWidth(@headerLeftColumns)
+        @leftSorter.insertSortBlocks()
 
       if tables.top.right
         @headerRightPane.innerHTML = ''
@@ -119,6 +102,7 @@ define ['underscore', 'backbone', 'services/split_table'], (_, Backbone, SplitTa
         @headerRightColumns = @headerRightPane.querySelector('table')
         @rightWidth = @_elWidth(@headerRightColumns)
         @headerHeight = tables.top.height
+        @rightSorter.insertSortBlocks()
 
       @log 'insert data'
       if @model.get('fetchType') == 'page'
@@ -132,6 +116,9 @@ define ['underscore', 'backbone', 'services/split_table'], (_, Backbone, SplitTa
       @_tableRendered = true
       @_setPanesSize()
       @_stopSpinner()
+
+    _makeSortable: (container) =>
+      new Sorting(app: @options.app, model: @model, container: container)
 
     _stopSpinner: =>
       @$el.spin(false)

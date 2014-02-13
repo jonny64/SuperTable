@@ -11,7 +11,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         if !@table.lastPage() then @getPage(@table.nextPage())
       @listenTo options.app, 'prev-page:click', =>
         if !@table.firstPage() then @getPage(@table.prevPage())
-      @listenTo options.app, 'sort:click', @getTable
+      @listenTo options.app, 'sort:click', @getPage
 
       #TODO api object/service
       @pageUrl = options.pageUrl
@@ -24,6 +24,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @_fetchPage(index, 'mergePage')
 
     getPage: (index) =>
+      index || (index = @table.start())
       @_fetchPage(index, 'page')
 
     _fetchPage: (index, type) =>
