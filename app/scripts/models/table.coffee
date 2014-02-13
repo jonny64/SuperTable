@@ -3,11 +3,11 @@ define ['underscore', 'backbone'], (_, Backbone) ->
     parse: (resp, options) ->
       if @get('fetchType') == 'mergePage'
         resp.start = '' + @start()
-        resp.portion = '' + (@portion() + parseInt(resp.portion, 10))
+        resp.cnt = '' + (@cnt() + parseInt(resp.cnt, 10))
       resp
 
     lastPage: =>
-      @total() - @portion() <= @start()
+      @total() - @cnt() <= @start()
 
     firstPage: =>
       !@start()
@@ -20,5 +20,6 @@ define ['underscore', 'backbone'], (_, Backbone) ->
 
     start: => parseInt(@get('start'), 10)
     portion: => parseInt(@get('portion'), 10)
+    cnt: => parseInt(@get('cnt'), 10)
     total: => parseInt(@get('total'), 10)
 

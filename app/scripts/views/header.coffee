@@ -21,7 +21,7 @@ define ['backbone', 'templates/header'], (Backbone, template) ->
 
     renderBindVals: =>
       @$firstRow.html(@model.start() + 1 || '?')
-      @$lastRow.html(@model.start() + @model.portion() || '?')
+      @$lastRow.html(@model.start() + @model.cnt() || '?')
       @$totalRows.html(@model.total() || '?')
 
       if !@model.firstPage() then @enablePrev() else @disablePrev()
