@@ -7,7 +7,9 @@ define ['underscore'], (_) ->
         @_insertWidthRulers(table)
         widths = @_countWidths(table)
 
-      @top = @_splitTable(table.querySelector('thead'), widths)
+      @top = @_splitTable(table.querySelector('thead'),
+                          widths,
+                          tableDefaults.scrollBarWidth)
       @bottom = @_splitTable(table.querySelector('tbody'), widths)
 
     _createTable: (html) ->
@@ -27,14 +29,17 @@ define ['underscore'], (_) ->
       body.appendChild(div)
       div
 
-    _splitTable: (table, widths) =>
+    _splitTable: (table, widths, scrollWidth=0) =>
       height = 0
+      widthLeft = 0
+      widthRight = 0
       left = null
       right = null
       if table
         left = document.createElement('table')
         left.style.tableLayout = 'fixed'
         right = left.cloneNode()
+        rightDiv = document.createElement('div')
         _(table.querySelectorAll('tr')).each((tr) =>
           trLeft = tr.cloneNode()
           trRight = tr.cloneNode()
@@ -52,8 +57,13 @@ define ['underscore'], (_) ->
           _(tr.querySelectorAll('td, th')).each((td) =>
             if td.className != 'freezbar-cell'
               if tr.className == 'st-table-widths-row' and widths
-                td.style.width = "#{widths[ind]}px"
+                width = widths[ind]
+                td.style.width = "#{width}px"
                 ind = ind + 1
+                if flag
+                  widthLeft = widthLeft + width
+                else
+                  widthRight = widthRight + width
 
               if flag
                 trLeft.appendChild td.cloneNode(true)
@@ -62,8 +72,15 @@ define ['underscore'], (_) ->
             else
               flag = false
             ))
+        left.style.width = "#{widthLeft}px"
+        if widthRight != 0
+          rightDiv.style.width = "#{widthRight +
+                                    scrollWidth +
+                                    @tableDefaults.extraWidth}px"
+          right.style.width = "#{widthRight}px"
+        rightDiv.appendChild right
       left: left
-      right: right
+      right: rightDiv
       height: height
 
     _insertWidthRulers: (table) =>

@@ -2,8 +2,9 @@ define [
   'underscore',
   'backbone',
   'services/split_table',
-  'services/sorting'
-  ], (_, Backbone, SplitTable, Sorting) ->
+  'services/sorting',
+  'services/resizing'
+  ], (_, Backbone, SplitTable, Sorting, Resizing) ->
   class TableView extends Backbone.View
     el: '@table-container'
     initialize: ->
@@ -13,8 +14,11 @@ define [
         rowHeight: 24
         width: 0
         height: 0
+        extraWidth: 100 # to be able to widen last column
+        scrollBarWidth: null
 
-      @log = @options.app.log
+      @app = @options.app
+      @log = @app.log
       @listenTo @options.app, 'page:loading', @_startSpinner
       @listenTo @options.app, 'page:loaded', @_stopSpinner
       @listenTo @model, 'change', (model) =>
@@ -49,12 +53,13 @@ define [
 
       @$tableContainer = @$('.st-table-container')
       @tableContainer = @$tableContainer[0]
-      @tableRightViewport = @tableContainer.querySelector(".st-table-right-viewport")
-      @tableLeftViewport = @tableContainer.querySelector(".st-table-left-viewport")
-      @headerRightPane = @tableContainer.querySelector(".st-table-header-right-pane")
-      @headerLeftPane = @tableContainer.querySelector(".st-table-header-left-pane")
-      @leftSorter = @_makeSortable(@headerLeftPane)
-      @rightSorter = @_makeSortable(@headerRightPane)
+      @staticOverlay = @tableContainer.querySelector('.st-overlay-container')
+      @tableRightViewport = @tableContainer.querySelector('.st-table-right-viewport')
+      @tableLeftViewport = @tableContainer.querySelector('.st-table-left-viewport')
+      @headerRightPane = @tableContainer.querySelector('.st-table-header-right-pane')
+      @headerLeftPane = @tableContainer.querySelector('.st-table-header-left-pane')
+      @leftExts = @_assignExtensions(@headerLeftPane)
+      @rightExts = @_assignExtensions(@headerRightPane)
       @_regionsAssigned = true
 
     _onScroll: (e) =>
@@ -93,16 +98,16 @@ define [
         @headerLeftPane.innerHTML = ''
         @headerLeftPane.appendChild tables.top.left
         @headerLeftColumns = @headerLeftPane.querySelector('table')
-        @leftWidth = @_elWidth(@headerLeftColumns)
-        @leftSorter.insertSortBlocks()
+        @leftWidth = @app.elWidth(@headerLeftColumns)
+        @leftExts.reset()
 
       if tables.top.right
         @headerRightPane.innerHTML = ''
         @headerRightPane.appendChild tables.top.right if tables.top.right
         @headerRightColumns = @headerRightPane.querySelector('table')
-        @rightWidth = @_elWidth(@headerRightColumns)
+        @rightWidth = @app.elWidth(@headerRightColumns)
         @headerHeight = tables.top.height
-        @rightSorter.insertSortBlocks()
+        @rightExts.reset()
 
       @log 'insert data'
       if @model.get('fetchType') == 'page'
@@ -117,8 +122,16 @@ define [
       @_setPanesSize()
       @_stopSpinner()
 
-    _makeSortable: (container) =>
-      new Sorting(app: @options.app, model: @model, container: container)
+    _assignExtensions: (container) =>
+      sort: new Sorting(app: @options.app, model: @model, container: container)
+      resize: new Resizing
+        app: @options.app
+        model: @model
+        container: container
+        static: @staticOverlay
+      reset: ->
+        @sort.insertSortBlocks()
+        @resize.setGrid()
 
     _stopSpinner: =>
       @$el.spin(false)
@@ -134,40 +147,34 @@ define [
       @tableDefaults.width = @containerWidth
       @tableDefaults.height = @containerHeight
 
-      fixedColumnsWidth = @leftWidth
-      rightCanvasWidth = @rightWidth
-
       scrollWidth = @_scrollBarWidth()
       borderWidth = @tableDefaults.borderWidth
 
-      rightPaneWidth = _.min([@containerWidth - fixedColumnsWidth, rightCanvasWidth + scrollWidth])
+      rightPaneWidth = _.min([@containerWidth - @leftWidth, @rightWidth + scrollWidth])
       paneHeight = @containerHeight - @headerHeight
 
       @tableContainer.style.width = "#{@containerWidth}px"
       @tableContainer.style.height = "#{@containerHeight}px"
 
-      @headerLeftPane.style.width = "#{fixedColumnsWidth}px"
-      @headerRightPane.style.left = "#{fixedColumnsWidth}px"
+      @headerLeftPane.style.width = "#{@leftWidth}px"
+      @headerRightPane.style.left = "#{@leftWidth}px"
       @headerRightPane.style.width = "#{rightPaneWidth}px"
 
       @tableLeftViewport.style.top = "#{@headerHeight}px"
-      @tableLeftViewport.style.width = "#{fixedColumnsWidth}px"
+      @tableLeftViewport.style.width = "#{@leftWidth}px"
       @tableLeftViewport.style.height = "#{paneHeight}px"
 
       @tableRightViewport.style.top = "#{@headerHeight}px"
-      @tableRightViewport.style.left = "#{fixedColumnsWidth}px"
+      @tableRightViewport.style.left = "#{@leftWidth}px"
       @tableRightViewport.style.width = "#{rightPaneWidth}px"
       @tableRightViewport.style.height = "#{paneHeight}px"
 
     _scrollBarWidth: =>
-      return @scrollBarWidth if @scrollBarWidth
+      return @tableDefaults.scrollBarWidth if @tableDefaults.scrollBarWidth != null
       div = document.createElement('div')
       div.innerHTML = '<div style="width:50px;height:50px;position:absolute;left:-50px;top:-50px;overflow:auto;"><div style="width:1px;height:100px;"></div></div>'
       div = div.firstChild
       document.body.appendChild(div)
       width = div.offsetWidth - div.clientWidth
       document.body.removeChild(div)
-      @scrollBarWidth = width
-
-    _elWidth: (obj) ->
-      Math.max obj.clientWidth, obj.offsetWidth, obj.scrollWidth
+      @tableDefaults.scrollBarWidth = width
