@@ -5,25 +5,31 @@ define ['underscore', 'jquery'], (_, $) ->
       @model = options.model
       @app = options.app
       @currentBlock = null
+      @holder = null
 
     setGrid: ->
-      holder = @resizeHolder()
-      widthCols = {}
+      @$container[0].removeChild @holder if @holder
+      @holder = @resizeHolder()
+      @widthCols = {}
+      table = @$container[0].querySelector('table')
       @$container.find('tr .st-table-column-holder').each((ind, el) =>
         right = el.offsetLeft + @app.elWidth(el)
-        widthCols[right] = el)
+        @widthCols[right] = el)
+      @widthColsKeys = _.keys(@widthCols)
       tds = @$container.find('th, td').filter(':not(.st-table-column-holder)')
       _(tds).each((td) =>
-        tdWidth = @app.elWidth(td)
+        left = td.offsetLeft + td.clientWidth
         resizeBlock = @resizeBlock
-          left: td.offsetLeft + tdWidth, top: td.offsetTop,
+          left: left, top: td.offsetTop,
           @app.elHeight(td)
         resizeBlock._resize = {}
+        resizeBlock._resize.resizeGrid = @
+        resizeBlock._resize.table = table
         resizeBlock._resize.td = td
-        resizeBlock._resize.width = tdWidth
+        resizeBlock._resize.width = td.clientWidth
         resizeBlock._resize.cols = @_getWidthColumns(td)
-        holder.appendChild resizeBlock )
-      @$container[0].appendChild holder
+        @holder.appendChild resizeBlock )
+      @$container[0].appendChild @holder
 
     resizeHolder: =>
       div = document.createElement('div')
@@ -39,9 +45,7 @@ define ['underscore', 'jquery'], (_, $) ->
       resizeDiv
 
     _getWidthColumns: (td) =>
-
-    # split given width among num columns
-    _splitByColumns: (width, num) ->
-      rest = width % num
-      base = Math.floor(width / num)
-      ((base + (if (i <= rest) then 1 else 0)) for i in [1..num])
+      offset = td.offsetLeft
+      width = @app.elWidth(td)
+      (@widthCols[key] for key in  _.filter(@widthColsKeys, ((el) ->
+        offset < parseInt(el, 10) <= offset + width)))

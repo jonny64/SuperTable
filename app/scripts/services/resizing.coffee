@@ -18,6 +18,7 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       @statOverlay.appendChild @resizeBar.div
       @startDragX = e.clientX
       @origWidth = @$current[0]._resize.width
+      @numCols = @$current[0]._resize.cols.length
       @dragging = true
       e.preventDefault()
       e.stopPropagation()
@@ -31,7 +32,7 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       return unless @dragging
       newWidth = @_newWidth(e)
       @app.log "prev width: #{@origWidth} | new width: #{newWidth}"
-      @_resizeAction(newWidth, @resizeBar.div)
+      @_resizeAction(newWidth, @$current[0])
 
       @$current.removeClass('dragging')
       @$current = null
@@ -44,7 +45,7 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
     _newWidth: (e) =>
       return 0 unless @dragging
       offset = e.clientX - @startDragX
-      _.max [@tableDefaults.columnMinWidth, @origWidth + offset]
+      _.max [@tableDefaults.columnMinWidth * @numCols, @origWidth + offset]
 
     _resizeBar: (origin) =>
       bar = document.createElement('div')
@@ -63,7 +64,12 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       { div: bar, initLeft: left }
 
     _resizeAction: (width, origin) ->
-
+      tableWidth = @app.elWidth(origin._resize.table)
+      diff = width - origin._resize.width
+      origin._resize.table.style.width = "#{tableWidth + diff}px"
+      for w, i in @_splitByColumns(width, @numCols)
+        origin._resize.cols[i].style.width = "#{w}px"
+      origin._resize.resizeGrid.setGrid()
 
     _cancelSelection: ->
       if document.selection
@@ -71,3 +77,9 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       else if window.getSelection
         try
           window.getSelection().collapseToStart()
+
+    # split given width among num columns
+    _splitByColumns: (width, num) ->
+      rest = width % num
+      base = Math.floor(width / num)
+      ((base + (if (i <= rest) then 1 else 0)) for i in [1..num])
