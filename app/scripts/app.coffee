@@ -31,3 +31,9 @@ define [
         pageUrl: options.pageUrl
 
       pageFetchingService.getTable()
+
+    elWidth: (obj) ->
+      Math.max obj.clientWidth, obj.offsetWidth, obj.scrollWidth
+
+    elHeight: (obj) ->
+      Math.max obj.clientHeight, obj.offsetHeight, obj.scrollHeight

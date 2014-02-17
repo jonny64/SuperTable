@@ -7,7 +7,9 @@ define ['underscore'], (_) ->
         @_insertWidthRulers(table)
         widths = @_countWidths(table)
 
-      @top = @_splitTable(table.querySelector('thead'), widths)
+      @top = @_splitTable(table.querySelector('thead'),
+                          widths,
+                          tableDefaults.scrollBarWidth)
       @bottom = @_splitTable(table.querySelector('tbody'), widths)
 
     _createTable: (html) ->
@@ -27,14 +29,19 @@ define ['underscore'], (_) ->
       body.appendChild(div)
       div
 
-    _splitTable: (table, widths) =>
+    _splitTable: (table, widths, scrollWidth=0) =>
       height = 0
+      widthLeft = 0
+      widthRight = 0
       left = null
       right = null
       if table
         left = document.createElement('table')
         left.style.tableLayout = 'fixed'
+        left.className = 'st-fixed-table-left'
         right = left.cloneNode()
+        right.className = 'st-fixed-table-right'
+        rightDiv = document.createElement('div')
         _(table.querySelectorAll('tr')).each((tr) =>
           trLeft = tr.cloneNode()
           trRight = tr.cloneNode()
@@ -52,8 +59,13 @@ define ['underscore'], (_) ->
           _(tr.querySelectorAll('td, th')).each((td) =>
             if td.className != 'freezbar-cell'
               if tr.className == 'st-table-widths-row' and widths
-                td.style.width = "#{widths[ind]}px"
+                width = widths[ind]
+                td.style.width = "#{width}px"
                 ind = ind + 1
+                if flag
+                  widthLeft = widthLeft + width
+                else
+                  widthRight = widthRight + width
 
               if flag
                 trLeft.appendChild td.cloneNode(true)
@@ -62,13 +74,21 @@ define ['underscore'], (_) ->
             else
               flag = false
             ))
+        left.style.width = "#{widthLeft}px"
+        if widthRight != 0
+          rightDiv.style.width = "#{widthRight +
+                                    scrollWidth +
+                                    @tableDefaults.extraWidth}px"
+          right.style.width = "#{widthRight}px"
+        rightDiv.appendChild right
       left: left
-      right: right
+      right: rightDiv
       height: height
 
     _insertWidthRulers: (table) =>
       tableWidth = 0
       splitAt = 0
+      col = 0
       for cell, ind in table.querySelector('tr').querySelectorAll('th, td')
         if cell.className == 'freezbar-cell' then splitAt = ind
         cols = if cell.colSpan then cell.colSpan else 1
@@ -84,7 +104,8 @@ define ['underscore'], (_) ->
         className = if i == splitAt
             'freezbar-cell'
           else
-            'st-table-column-holder'
+            col = col + 1
+            "st-table-column-holder st-width-col-#{col}"
         if thead
           tdH = trH.insertCell(-1)
           tdH.className = className

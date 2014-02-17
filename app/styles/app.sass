@@ -62,7 +62,7 @@ table.st-table-pre-render
   overflow: hidden
   position: absolute
   top: 0
-  
+
 .st-table-header-left-columns
   table-layout: fixed
   border-collapse: collapse
@@ -119,7 +119,6 @@ table.st-table-pre-render
   text-align: right
 
 .st-table-column-holder
-  min-width: 120px
   width: 120px
   padding: 0
 
@@ -132,7 +131,7 @@ table.st-table-pre-render
     color: blue
   &.disabled
     color: #dddddd
-  
+
 .st-sort-block
   cursor: pointer
   display: inline-block
@@ -141,3 +140,38 @@ table.st-table-pre-render
     color: #333
   .semi-active
     color: #888
+
+.st-resize-container
+  position: absolute
+  top: 0
+  left: 0
+
+.st-resize-block
+  position: absolute
+  cursor: e-resize
+  padding: 0
+  margin-left: -5px
+  width: 5px
+  z-index: 200
+  &:hover
+    background-color: blue
+
+.st-resizing-bar-holder
+  position: absolute
+  padding: 0
+  width: 5px
+  z-index: 300
+
+.st-resizing-bar
+  cursor: e-resize
+  padding: 0
+  border: 0
+  width: 5px
+  background-color: red
+
+.st-resizing-drop-bar
+  padding: 0
+  border: 0
+  margin-left: 2px
+  width: 1px
+  background-color: red
