@@ -73,7 +73,7 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       diff = width - origin._resize.width
       $tables.each((ind, table) -> table.style.width = "#{tableWidth + diff}px")
       for w, i in @_splitByColumns(width, @numCols)
-        tds = @$main[0].getElementsByClassName(origin._resize.colsClasses[i])
+        tds = @$main[0].querySelectorAll(@_classToQuery(origin._resize.colsClasses[i]))
         td.style.width = "#{w}px" for td in tds
       origin._resize.resizeGrid.setGrid()
       if _.isFunction(@onResizeCb)
@@ -85,6 +85,9 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       else if window.getSelection
         try
           window.getSelection().collapseToStart()
+
+    _classToQuery: (str) ->
+      ".#{str}".split(' ').join('.')
 
     # split given width among num columns
     _splitByColumns: (width, num) ->
