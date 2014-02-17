@@ -2,6 +2,7 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
   class Resizing
     constructor: (options) ->
       @app = options.app
+      @onResizeCb = options.onResizeCb
       @tableDefaults = options.tableDefaults
       @$main = options.$main
       @mainHeight = @$main.height()
@@ -18,7 +19,7 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       @statOverlay.appendChild @resizeBar.div
       @startDragX = e.clientX
       @origWidth = @$current[0]._resize.width
-      @numCols = @$current[0]._resize.cols.length
+      @numCols = @$current[0]._resize.colsClasses.length
       @dragging = true
       e.preventDefault()
       e.stopPropagation()
@@ -41,6 +42,7 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       @startDragX = 0
       @origWidth = 0
       @dragging = false
+      @_cancelSelection() #ie8
 
     _newWidth: (e) =>
       return 0 unless @dragging
@@ -58,18 +60,24 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       bar.style.top = "#{top}px"
       bar.style.left = "#{left}px"
       headerBar = bar.querySelector('.st-resizing-bar')
-      headerBar.style.height = "#{originRect.height}px"
+      # ie8 hack
+      originHeight = originRect.height || (originRect.bottom - originRect.top)
+      headerBar.style.height = "#{originHeight}px"
       dropBar = bar.querySelector('.st-resizing-drop-bar')
       dropBar.style.height = "#{@mainHeight}px"
       { div: bar, initLeft: left }
 
-    _resizeAction: (width, origin) ->
-      tableWidth = @app.elWidth(origin._resize.table)
+    _resizeAction: (width, origin) =>
+      $tables = @$main.find(".#{origin._resize.tableClass}")
+      tableWidth = $tables.eq(0).width()
       diff = width - origin._resize.width
-      origin._resize.table.style.width = "#{tableWidth + diff}px"
+      $tables.each((ind, table) -> table.style.width = "#{tableWidth + diff}px")
       for w, i in @_splitByColumns(width, @numCols)
-        origin._resize.cols[i].style.width = "#{w}px"
+        tds = @$main[0].getElementsByClassName(origin._resize.colsClasses[i])
+        td.style.width = "#{w}px" for td in tds
       origin._resize.resizeGrid.setGrid()
+      if _.isFunction(@onResizeCb)
+        @onResizeCb.call(null, origin._resize.tableClass)
 
     _cancelSelection: ->
       if document.selection

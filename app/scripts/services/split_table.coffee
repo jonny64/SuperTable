@@ -38,7 +38,9 @@ define ['underscore'], (_) ->
       if table
         left = document.createElement('table')
         left.style.tableLayout = 'fixed'
+        left.className = 'st-fixed-table-left'
         right = left.cloneNode()
+        right.className = 'st-fixed-table-right'
         rightDiv = document.createElement('div')
         _(table.querySelectorAll('tr')).each((tr) =>
           trLeft = tr.cloneNode()
@@ -86,6 +88,7 @@ define ['underscore'], (_) ->
     _insertWidthRulers: (table) =>
       tableWidth = 0
       splitAt = 0
+      col = 0
       for cell, ind in table.querySelector('tr').querySelectorAll('th, td')
         if cell.className == 'freezbar-cell' then splitAt = ind
         cols = if cell.colSpan then cell.colSpan else 1
@@ -101,7 +104,8 @@ define ['underscore'], (_) ->
         className = if i == splitAt
             'freezbar-cell'
           else
-            'st-table-column-holder'
+            col = col + 1
+            "st-table-column-holder st-width-col-#{col}"
         if thead
           tdH = trH.insertCell(-1)
           tdH.className = className

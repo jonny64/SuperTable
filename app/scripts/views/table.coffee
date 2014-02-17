@@ -65,6 +65,8 @@ define [
       @resizer = new Resizing(
         app: @app,
         "$main": @$el,
+        onResizeCb: ((tableClass) =>
+          @_setPanesSize() if tableClass == 'st-fixed-table-left'),
         statOverlay: @staticOverlay,
         tableDefaults: @tableDefaults) unless @resizer
       @_regionsAssigned = true
@@ -105,14 +107,12 @@ define [
         @headerLeftPane.innerHTML = ''
         @headerLeftPane.appendChild tables.top.left
         @headerLeftColumns = @headerLeftPane.querySelector('table')
-        @leftWidth = @app.elWidth(@headerLeftColumns)
         @leftExts.reset()
 
       if tables.top.right
         @headerRightPane.innerHTML = ''
         @headerRightPane.appendChild tables.top.right if tables.top.right
         @headerRightColumns = @headerRightPane.querySelector('table')
-        @rightWidth = @app.elWidth(@headerRightColumns)
         @headerHeight = tables.top.height
         @rightExts.reset()
 
@@ -135,7 +135,7 @@ define [
         app: @options.app
         model: @model
         container: container
-      reset: ->
+      reset: () ->
         @sort.insertSortBlocks()
         @resize.setGrid()
 
@@ -147,11 +147,12 @@ define [
 
     _setPanesSize: =>
       @log 'set panes size'
-      return unless (@tableDefaults.width - @containerWidth) + (@tableDefaults.height - @containerHeight)
-
       @log "setting sizes for width: #{@containerWidth}, height: #{@containerHeight}"
       @tableDefaults.width = @containerWidth
       @tableDefaults.height = @containerHeight
+
+      @leftWidth = @app.elWidth(@headerLeftColumns)
+      @rightWidth = @app.elWidth(@headerRightColumns)
 
       scrollWidth = @_scrollBarWidth()
       borderWidth = @tableDefaults.borderWidth

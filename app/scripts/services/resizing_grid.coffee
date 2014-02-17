@@ -24,10 +24,10 @@ define ['underscore', 'jquery'], (_, $) ->
           @app.elHeight(td)
         resizeBlock._resize = {}
         resizeBlock._resize.resizeGrid = @
-        resizeBlock._resize.table = table
-        resizeBlock._resize.td = td
+        resizeBlock._resize.tableClass = table.className
+        resizeBlock._resize.tdClass = td.className
         resizeBlock._resize.width = td.clientWidth
-        resizeBlock._resize.cols = @_getWidthColumns(td)
+        resizeBlock._resize.colsClasses = @_getWidthColumns(td)
         @holder.appendChild resizeBlock )
       @$container[0].appendChild @holder
 
@@ -47,5 +47,5 @@ define ['underscore', 'jquery'], (_, $) ->
     _getWidthColumns: (td) =>
       offset = td.offsetLeft
       width = @app.elWidth(td)
-      (@widthCols[key] for key in  _.filter(@widthColsKeys, ((el) ->
+      (@widthCols[key].className for key in  _.filter(@widthColsKeys, ((el) ->
         offset < parseInt(el, 10) <= offset + width)))
