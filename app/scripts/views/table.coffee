@@ -3,13 +3,15 @@ define [
   'backbone',
   'services/split_table',
   'services/sorting',
+  'services/resizing_grid',
   'services/resizing'
-  ], (_, Backbone, SplitTable, Sorting, Resizing) ->
+  ], (_, Backbone, SplitTable, Sorting, ResizingGrid, Resizing) ->
   class TableView extends Backbone.View
     el: '@table-container'
     initialize: ->
       @tableDefaults =
         columnWidth: 120
+        columnMinWidth: 40
         borderWidth: 1
         rowHeight: 24
         width: 0
@@ -60,6 +62,11 @@ define [
       @headerLeftPane = @tableContainer.querySelector('.st-table-header-left-pane')
       @leftExts = @_assignExtensions(@headerLeftPane)
       @rightExts = @_assignExtensions(@headerRightPane)
+      @resizer = new Resizing(
+        app: @app,
+        "$main": @$el,
+        statOverlay: @staticOverlay,
+        tableDefaults: @tableDefaults) unless @resizer
       @_regionsAssigned = true
 
     _onScroll: (e) =>
@@ -124,11 +131,10 @@ define [
 
     _assignExtensions: (container) =>
       sort: new Sorting(app: @options.app, model: @model, container: container)
-      resize: new Resizing
+      resize: new ResizingGrid
         app: @options.app
         model: @model
         container: container
-        static: @staticOverlay
       reset: ->
         @sort.insertSortBlocks()
         @resize.setGrid()

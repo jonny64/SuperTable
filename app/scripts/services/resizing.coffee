@@ -1,63 +1,69 @@
-define ['underscore', 'jquery'], (_, $) ->
+define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
   class Resizing
     constructor: (options) ->
-      @$container = $(options.container)
-      @model = options.model
       @app = options.app
-      @currentBlock = null
-      @$container.on 'mousedown', '.st-resize-block', @_onMouseDown
-      @$container.on 'mousemove mouseup', @_onResizeAction
-
-    setGrid: ->
-      holder = @resizeHolder()
-      widthCols = {}
-      @$container.find('tr .st-table-column-holder').each((ind, el) =>
-        right = el.offsetLeft + @app.elWidth(el)
-        widthCols[right] = el)
-      tds = @$container.find('th, td').filter(':not(.st-table-column-holder)')
-      _(tds).each((td) =>
-        resizeBlock = @resizeBlock
-          left: td.offsetLeft + @app.elWidth(td), top: td.offsetTop,
-          @app.elHeight(td)
-        resizeBlock._resize = {}
-        resizeBlock._resize.div = td
-        resizeBlock._resize.cols = @_getWidthColumns(td)
-        holder.appendChild resizeBlock )
-      @$container[0].appendChild holder
-
-    resizeHolder: =>
-      div = document.createElement('div')
-      div.className = 'st-resize-container'
-      div
-
-    resizeBlock: (pos, height) ->
-      resizeDiv = document.createElement('div')
-      resizeDiv.className = 'st-resize-block'
-      resizeDiv.style.height = "#{height}px"
-      resizeDiv.style.left = "#{pos.left}px"
-      resizeDiv.style.top = "#{pos.top}px"
-      resizeDiv
-
-    _getWidthColumns: (td) =>
+      @tableDefaults = options.tableDefaults
+      @$main = options.$main
+      @mainHeight = @$main.height()
+      @statOverlay = options.statOverlay
+      @$main.on 'mousedown', '.st-resize-block', @_onMouseDown
+      @$main.on 'mousemove', @_onMouseMove
+      @$main.on 'mouseup', @_onMouseUp
+      @dragging = false
 
     _onMouseDown: (e) =>
-      @_cancelSelection()
-      @currentBlock = e.currentTarget
-      @prevBGColor = @currentBlock._resize.div.style.backgroundColor
-      @currentBlock._resize.div.style.backgroundColor = '#ccc'
-      console.log e
-      
-    _onResizeAction: (e) =>
-      return unless @currentBlock
-      if e.type == 'mouseup'
-        @currentBlock._resize.div.style.backgroundColor = @prevBGColor
-        @currentBlock = null
+      @$current = $(e.currentTarget)
+      @$current.addClass('dragging')
+      @resizeBar = @_resizeBar(e.currentTarget)
+      @statOverlay.appendChild @resizeBar.div
+      @startDragX = e.clientX
+      @origWidth = @$current[0]._resize.width
+      @dragging = true
+      e.preventDefault()
+      e.stopPropagation()
 
-    # split given width among num columns
-    _splitByColumns: (width, num) ->
-      rest = width % num
-      base = Math.floor(width / num)
-      ((base + (if (i <= rest) then 1 else 0)) for i in [1..num])
+    _onMouseMove: (e) =>
+      return unless @dragging
+      newLeft = @resizeBar.initLeft - @origWidth + @_newWidth(e)
+      @resizeBar.div.style.left = "#{newLeft}px"
+
+    _onMouseUp: (e) =>
+      return unless @dragging
+      newWidth = @_newWidth(e)
+      @app.log "prev width: #{@origWidth} | new width: #{newWidth}"
+      @_resizeAction(newWidth, @resizeBar.div)
+
+      @$current.removeClass('dragging')
+      @$current = null
+      @statOverlay.removeChild @resizeBar.div
+      @resizeBar = null
+      @startDragX = 0
+      @origWidth = 0
+      @dragging = false
+
+    _newWidth: (e) =>
+      return 0 unless @dragging
+      offset = e.clientX - @startDragX
+      _.max [@tableDefaults.columnMinWidth, @origWidth + offset]
+
+    _resizeBar: (origin) =>
+      bar = document.createElement('div')
+      bar.className = 'st-resizing-bar-holder'
+      bar.innerHTML = template()
+      originRect = origin.getBoundingClientRect()
+      staticRect = @statOverlay.getBoundingClientRect()
+      top = originRect.top - staticRect.top
+      left = originRect.left - staticRect.left
+      bar.style.top = "#{top}px"
+      bar.style.left = "#{left}px"
+      headerBar = bar.querySelector('.st-resizing-bar')
+      headerBar.style.height = "#{originRect.height}px"
+      dropBar = bar.querySelector('.st-resizing-drop-bar')
+      dropBar.style.height = "#{@mainHeight}px"
+      { div: bar, initLeft: left }
+
+    _resizeAction: (width, origin) ->
+
 
     _cancelSelection: ->
       if document.selection
