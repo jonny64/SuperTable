@@ -3,8 +3,9 @@ define [
   'backbone',
   'models/table',
   'views/layout',
-  'services/page_fetching'
-], (_, Backbone, TableModel, LayoutView, PageFetchingService) ->
+  'services/page_fetching',
+  'services/table_state_api'
+], (_, Backbone, TableModel, LayoutView, PageFetchingService, TableStateApi) ->
 
   class App
     version: '0.1.2'
@@ -29,6 +30,11 @@ define [
         app: @
         table: table
         pageUrl: options.pageUrl
+
+      tableStateApi = new TableStateApi
+        app: @
+        table: table
+        el: layoutView.table.tableContainer
 
       pageFetchingService.getTable()
 
