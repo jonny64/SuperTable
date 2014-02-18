@@ -80,6 +80,7 @@ define ['underscore'], (_) ->
                                     scrollWidth +
                                     @tableDefaults.extraWidth}px"
           right.style.width = "#{widthRight}px"
+          right.setAttribute 'data-scroll-width', '' + scrollWidth
         rightDiv.appendChild right
       left: left
       right: rightDiv

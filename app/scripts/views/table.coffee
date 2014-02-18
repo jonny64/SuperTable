@@ -66,7 +66,16 @@ define [
         app: @app,
         "$main": @$el,
         onResizeCb: ((tableClass) =>
-          @_setPanesSize() if tableClass == 'st-fixed-table-left'),
+          if tableClass == 'st-fixed-table-left'
+            @_setPanesSize()
+          else if tableClass == 'st-fixed-table-right'
+            tables = document.querySelectorAll('.st-fixed-table-right')
+            for table in tables
+              extraWidth = @tableDefaults.extraWidth +
+                if (_width = table.getAttribute('data-scroll-width')) then parseInt(_width, 10) else 0
+              div = table.parentElement
+              div.style.width = "#{@app.elWidth(table) + extraWidth}px"
+          ),
         statOverlay: @staticOverlay,
         tableDefaults: @tableDefaults) unless @resizer
       @_regionsAssigned = true
