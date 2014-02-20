@@ -42,7 +42,7 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       @startDragX = 0
       @origWidth = 0
       @dragging = false
-      @_cancelSelection() #ie8
+      @app.cancelSelection() #ie8
 
     _newWidth: (e) =>
       return 0 unless @dragging
@@ -78,13 +78,6 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       origin._resize.resizeGrid.setGrid()
       if _.isFunction(@onResizeCb)
         @onResizeCb.call(null, origin._resize.tableClass)
-
-    _cancelSelection: ->
-      if document.selection
-        document.selection.empty()
-      else if window.getSelection
-        try
-          window.getSelection().collapseToStart()
 
     _classToQuery: (str) ->
       ".#{str}".split(' ').join('.')

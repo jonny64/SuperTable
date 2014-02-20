@@ -43,3 +43,11 @@ define [
 
     elHeight: (obj) ->
       Math.max obj.clientHeight, obj.offsetHeight, obj.scrollHeight
+      
+    cancelSelection: ->
+      if document.selection
+        document.selection.empty()
+      else if window.getSelection
+        try
+          window.getSelection().collapseToStart()
+
