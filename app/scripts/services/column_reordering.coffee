@@ -20,15 +20,16 @@ define ['underscore', 'jquery'], (_, $) ->
         el: e.currentTarget
 
     _onMouseMove: (e) =>
-      return unless @initState or @dragEvent
+      return unless @initState
       if @dragEvent
         @_setDivPos(e, @dragEvent)
+        @_calcTable(@dragEvent)
       else if (Math.abs(@initState.x - e.clientX) > @dragConfig.threshold or
               Math.abs(@initState.y - e.clientY) > @dragConfig.threshold)
          @app.cancelSelection()
          el = @initState.el
          @dragEvent =
-           initState: @initState
+           initState: _.clone(@initState)
            oldPos:
              left: el.offsetLeft
              top: el.offsetTop
@@ -36,15 +37,17 @@ define ['underscore', 'jquery'], (_, $) ->
            elWidth: el.offsetWidth
            initElBgColor: el.style.backgroundColor
            dragDiv: @_dragDiv(@initState)
+         @_markGroup(@dragEvent)
          @_setDivPos(e, @dragEvent)
          @el.appendChild @dragEvent.dragDiv
 
     _onMouseUp: (e) =>
+      @initState = null
       return unless @dragEvent
+      @_unmarkGroup()
       @el.removeChild @dragEvent.dragDiv
       @app.cancelSelection()
       @dragEvent = null
-      @initState = null
 
     _dragDiv: (initState, pos) ->
       el = initState.el
@@ -114,3 +117,52 @@ define ['underscore', 'jquery'], (_, $) ->
       parent = el._reorder.nearestParent || @el.querySelector('table')
       left: parent.offsetLeft
       right: parent.offsetLeft + parent.offsetWidth
+
+    _markGroup: (drag) =>
+      if @prevState then @_unmarkGroup()
+      el = drag.initState.el
+      @prevState = []
+      @prevState.push el: el, state: @_saveThState(el)
+      _(el._reorder.children).each (child) =>
+        @prevState.push el: child, state: @_saveThState(child)
+
+    _unmarkGroup: =>
+      _(@prevState).each (s) =>
+        @_restoreThState s.el, s.state
+      @prevState = null
+
+    _saveThState: (el) ->
+      prevBg = el.style.backgroundColor
+      el.style.backgroundColor = '#ccc'
+      bg: prevBg
+
+    _restoreThState: (el, state) ->
+      el.style.backgroundColor = state.bg
+
+    _prevEdge: (el) ->
+      el.offsetLeft + (el.offsetWidth / 2)
+
+    _nextEdge: (el) =>
+      @_prevEdge(el)
+      
+    _calcTable: (drag) =>
+      div = drag.dragDiv
+      el = drag.initState.el
+      prev = el.previousElementSibling
+      next = el.nextElementSibling
+      if prev and div.offsetLeft < @_prevEdge(prev)
+        @app.log 'prev intersect'
+        @_insertBefore(el, prev)
+      else if next and (div.offsetLeft + div.offsetWidth) > @_nextEdge(next)
+        @app.log 'next intersect'
+        @_insertAfter(el, next)
+
+    _insertBefore: (el, prev) =>
+      parent = el.parentNode
+      del = parent.removeChild(el)
+      parent.insertBefore(del, prev)
+
+    _insertAfter: (el, next) =>
+      parent = el.parentNode
+      del = parent.removeChild(el)
+      parent.insertBefore(del, next.nextElementSibling)
