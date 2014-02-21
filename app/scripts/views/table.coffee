@@ -4,8 +4,9 @@ define [
   'services/split_table',
   'services/sorting',
   'services/resizing_grid',
-  'services/resizing'
-  ], (_, Backbone, SplitTable, Sorting, ResizingGrid, Resizing) ->
+  'services/resizing',
+  'services/column_reordering'
+  ], (_, Backbone, SplitTable, Sorting, ResizingGrid, Resizing, ColumnReordering) ->
   class TableView extends Backbone.View
     el: '@table-container'
     initialize: ->
@@ -65,20 +66,24 @@ define [
       @resizer = new Resizing(
         app: @app,
         "$main": @$el,
-        onResizeCb: ((tableClass) =>
-          if tableClass == 'st-fixed-table-left'
-            @_setPanesSize()
-          else if tableClass == 'st-fixed-table-right'
-            tables = document.querySelectorAll('.st-fixed-table-right')
-            for table in tables
-              extraWidth = @tableDefaults.extraWidth +
-                if (_width = table.getAttribute('data-scroll-width')) then parseInt(_width, 10) else 0
-              div = table.parentElement
-              div.style.width = "#{@app.elWidth(table) + extraWidth}px"
-          ),
+        onResizeCb: @_resizeCb,
         statOverlay: @staticOverlay,
         tableDefaults: @tableDefaults) unless @resizer
       @_regionsAssigned = true
+
+    _resizeCb: (tableClass) =>
+      if tableClass == 'st-fixed-table-left'
+        @_setPanesSize()
+        @leftExts.reorder.buildHierarchy()
+      else if tableClass == 'st-fixed-table-right'
+        tables = @tableContainer.querySelectorAll('.st-fixed-table-right')
+        for table in tables
+          extraWidth = @tableDefaults.extraWidth +
+            if (_width = table.getAttribute('data-scroll-width')) then parseInt(_width, 10) else 0
+          div = table.parentElement
+          div.style.width = "#{@app.elWidth(table) + extraWidth}px"
+        @rightExts.reorder.buildHierarchy()
+      @app.trigger 'sync:widths'
 
     _onScroll: (e) =>
       return unless @tableRightViewport
@@ -139,14 +144,14 @@ define [
       @_stopSpinner()
 
     _assignExtensions: (container) =>
-      sort: new Sorting(app: @options.app, model: @model, container: container)
-      resize: new ResizingGrid
-        app: @options.app
-        model: @model
-        container: container
+      options = { app: @options.app, model: @model, container: container }
+      sort: new Sorting options
+      resize: new ResizingGrid options
+      reorder: new ColumnReordering options
       reset: () ->
         @sort.insertSortBlocks()
         @resize.setGrid()
+        @reorder.buildHierarchy()
 
     _stopSpinner: =>
       @$el.spin(false)
