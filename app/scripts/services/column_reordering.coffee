@@ -79,11 +79,15 @@ define ['underscore', 'jquery'], (_, $) ->
         { el: td, left: td.offsetLeft, right: td.offsetLeft + td.offsetWidth }
       # build hierarchy
       _(w).each (tdi) ->
-        tdi.el._reorder ||= { children: [], parents: [] }
+        tdi.el._reorder ||= { children: [], parents: [], childrenByRow: [] }
         _(w).each (tdj) ->
           if tdi != tdj and tdi.left <= tdj.left and tdi.right >= tdj.right
-            tdj.el._reorder ||= { children: [], parents: [] }
+            tdj.el._reorder ||= { children: [], parents: [], childrenByRow: [] }
             tdi.el._reorder.children.push tdj.el
+            if tdi.el._reorder.childrenByRow[tdj.el.parentElement.sectionRowIndex]
+              tdi.el._reorder.childrenByRow[tdj.el.parentElement.sectionRowIndex]++
+            else
+              tdi.el._reorder.childrenByRow[tdj.el.parentElement.sectionRowIndex] = 1
             tdj.el._reorder.parents.push tdi.el
       # detect nearest parent
       _(tds).each (td) ->
@@ -161,8 +165,29 @@ define ['underscore', 'jquery'], (_, $) ->
       parent = el.parentNode
       del = parent.removeChild(el)
       parent.insertBefore(del, prev)
+      _(el._reorder.children).each (child) =>
+        childParent = child.parentNode
+        before = @_getNthPrev(child, prev._reorder.childrenByRow[childParent.sectionRowIndex])
+        childDel = childParent.removeChild(child)
+        childParent.insertBefore(childDel, before)
 
     _insertAfter: (el, next) =>
       parent = el.parentNode
       del = parent.removeChild(el)
       parent.insertBefore(del, next.nextElementSibling)
+      _(el._reorder.children).each (child) =>
+        childParent = child.parentNode
+        before = @_getNthNext(child, next._reorder.childrenByRow[childParent.sectionRowIndex] +
+                                     el._reorder.childrenByRow[childParent.sectionRowIndex])
+        childDel = childParent.removeChild(child)
+        childParent.insertBefore(childDel, before)
+
+    _getNthPrev: (el, n) ->
+      out = el
+      out = out.previousElementSibling for i in [1..n]
+      out
+
+    _getNthNext: (el, n) ->
+      out = el
+      out = out.nextElementSibling for i in [1..n]
+      out
