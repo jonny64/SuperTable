@@ -172,8 +172,11 @@ define ['underscore', 'jquery'], (_, $) ->
       parent.insertBefore(del, prev)
       _(el._reorder.children).each (row, ind) =>
         _(row).each (child) =>
-          childParent = child.parentElement
-          before = prev._reorder.children[ind][0]
+          childParent = child.parentNode
+          before = if prev
+              prev._reorder.children[ind][0]
+            else
+              null
           childDel = childParent.removeChild(child)
           childParent.insertBefore(childDel, before)
 
@@ -184,5 +187,5 @@ define ['underscore', 'jquery'], (_, $) ->
       @_prevPosition = pos
 
     _restorePosition: (drag) =>
-      @_insertBefore(drag.initState.el, @_prevPosition) if @_prevPosition
-      @_prevPosition = null
+      @_insertBefore(drag.initState.el, @_prevPosition) if typeof @_prevPosition != 'undefined'
+      @_prevPosition = undefined
