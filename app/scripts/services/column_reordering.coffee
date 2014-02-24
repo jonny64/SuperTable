@@ -9,8 +9,8 @@ define ['underscore', 'jquery'], (_, $) ->
       @$el = $(@el)
 
       @$el.on 'mousedown', 'th', @_onMouseDown
-      @$el.on 'mousemove', @_onMouseMove
-      @$el.on 'mouseup', @_onMouseUp
+      $(document).on 'mousemove', @_onMouseMove
+      $(document).on 'mouseup', @_onMouseUp
 
     _onMouseDown: (e) =>
       return if @dragEvent
@@ -38,6 +38,7 @@ define ['underscore', 'jquery'], (_, $) ->
            initElBgColor: el.style.backgroundColor
            dragDiv: @_dragDiv(@initState)
          @_markGroup(@dragEvent)
+         @_savePosition(el.nextSibling)
          @_setDivPos(e, @dragEvent)
          @el.appendChild @dragEvent.dragDiv
       e.preventDefault()
@@ -46,6 +47,7 @@ define ['underscore', 'jquery'], (_, $) ->
     _onMouseUp: (e) =>
       @initState = null
       return unless @dragEvent
+      @_restorePosition(@dragEvent) unless @el.contains(e.target)
       @_unmarkGroup()
       @el.removeChild @dragEvent.dragDiv
       @app.cancelSelection()
@@ -84,19 +86,12 @@ define ['underscore', 'jquery'], (_, $) ->
         { el: td, left: td.offsetLeft, right: td.offsetLeft + td.offsetWidth }
       # build hierarchy
       _(w).each (tdi) ->
-        tdi.el._reorder ||= { children: [], parents: [], childrenByRow: [] }
+        tdi.el._reorder ||= { children: [], parents: []}
         _(w).each (tdj) ->
           if tdi != tdj and tdi.left <= tdj.left and tdi.right >= tdj.right
-            tdj.el._reorder ||= { children: [], parents: [], childrenByRow: [] }
-            tdi.el._reorder.children.push tdj.el
-            if tdi.el._reorder
-                  .childrenByRow[tdj.el.parentElement.getAttribute('data-row-index')]
-              tdi.el._reorder
-                 .childrenByRow[tdj.el.parentElement.getAttribute('data-row-index')]++
-            else
-              tdi.el._reorder
-                 .childrenByRow[tdj.el.parentElement.getAttribute('data-row-index')] = 1
-
+            tdj.el._reorder ||= { children: [], parents: [] }
+            tdi.el._reorder.children[tdj.el.parentElement.getAttribute('data-row-index')] ||= []
+            tdi.el._reorder.children[tdj.el.parentElement.getAttribute('data-row-index')].push tdj.el
             tdj.el._reorder.parents.push tdi.el
       # detect nearest parent
       _(tds).each (td) ->
@@ -111,8 +106,9 @@ define ['underscore', 'jquery'], (_, $) ->
       # count group rect
       _(tds).each (td) =>
         rect = @_getRect(td)
-        _(td._reorder.children).each (child) =>
-          rect = @_calcRect(rect, @_getRect(child))
+        _(td._reorder.children).each (row) =>
+          _(row).each (child) =>
+            rect = @_calcRect(rect, @_getRect(child))
         td._reorder.boundingRect = rect
 
     _getRect: (el) ->
@@ -137,8 +133,9 @@ define ['underscore', 'jquery'], (_, $) ->
       el = drag.initState.el
       @prevState = []
       @prevState.push el: el, state: @_saveThState(el)
-      _(el._reorder.children).each (child) =>
-        @prevState.push el: child, state: @_saveThState(child)
+      _(el._reorder.children).each (row) =>
+        _(row).each (child) =>
+          @prevState.push el: child, state: @_saveThState(child)
 
     _unmarkGroup: =>
       _(@prevState).each (s) =>
@@ -158,7 +155,7 @@ define ['underscore', 'jquery'], (_, $) ->
 
     _nextEdge: (el) =>
       @_prevEdge(el)
-      
+
     _calcTable: (drag) =>
       div = drag.dragDiv
       el = drag.initState.el
@@ -173,30 +170,19 @@ define ['underscore', 'jquery'], (_, $) ->
       parent = el.parentNode
       del = parent.removeChild(el)
       parent.insertBefore(del, prev)
-      _(el._reorder.children).each (child) =>
-        childParent = child.parentNode
-        before = @_getNthPrev(child, prev._reorder.childrenByRow[childParent.getAttribute('data-row-index')])
-        childDel = childParent.removeChild(child)
-        childParent.insertBefore(childDel, before)
+      _(el._reorder.children).each (row, ind) =>
+        _(row).each (child) =>
+          childParent = child.parentElement
+          before = prev._reorder.children[ind][0]
+          childDel = childParent.removeChild(child)
+          childParent.insertBefore(childDel, before)
 
     _insertAfter: (el, next) =>
-      parent = el.parentNode
-      del = parent.removeChild(el)
-      parent.insertBefore(del, next.nextSibling)
-      _(el._reorder.children).each (child) =>
-        childParent = child.parentNode
-        before = @_getNthNext(child,
-          next._reorder.childrenByRow[childParent.getAttribute('data-row-index')] +
-            el._reorder.childrenByRow[childParent.getAttribute('data-row-index')])
-        childDel = childParent.removeChild(child)
-        childParent.insertBefore(childDel, before)
+      @_insertBefore(el, next.nextSibling)
 
-    _getNthPrev: (el, n) ->
-      out = el
-      out = out.previousSibling for i in [1..n]
-      out
+    _savePosition: (pos) =>
+      @_prevPosition = pos
 
-    _getNthNext: (el, n) ->
-      out = el
-      out = out.nextSibling for i in [1..n]
-      out
+    _restorePosition: (drag) =>
+      @_insertBefore(drag.initState.el, @_prevPosition) if @_prevPosition
+      @_prevPosition = null
