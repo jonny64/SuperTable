@@ -147,7 +147,7 @@ define [
       options = { app: @options.app, model: @model, container: container }
       sort: new Sorting options
       resize: new ResizingGrid options
-      reorder: new ColumnReordering options
+      reorder: new ColumnReordering options, @tableRightViewport
       reset: () ->
         @sort.insertSortBlocks()
         @resize.setGrid()
