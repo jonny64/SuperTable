@@ -5,8 +5,17 @@ define [
   'services/sorting',
   'services/resizing_grid',
   'services/resizing',
-  'services/column_reordering'
-  ], (_, Backbone, SplitTable, Sorting, ResizingGrid, Resizing, ColumnReordering) ->
+  'services/column_reordering',
+  'templates/_sort_block'
+  ], (
+  _,
+  Backbone,
+  SplitTable,
+  Sorting,
+  ResizingGrid,
+  Resizing,
+  ColumnReordering,
+  sortTemplate ) ->
   class TableView extends Backbone.View
     el: '@table-container'
     initialize: ->
@@ -41,6 +50,12 @@ define [
       html = @model.get('data')
       @_renderContainer(html) if html
       @
+
+    insertSortBlocks: (container) ->
+      tds = container.querySelectorAll('td.sortable, th.sortable')
+      _(tds).each (td) ->
+        td.style.whiteSpace = 'nowrap'
+        $(td).append(sortTemplate())
 
     onShow: ->
       if @_tableRendered
@@ -114,7 +129,7 @@ define [
       @log 'render container'
       @_startSpinner()
 
-      tables = new SplitTable(data, @tableDefaults, @model)
+      tables = new SplitTable(data, @tableDefaults, @model, @insertSortBlocks)
 
       @log 'insert header'
       if tables.top.left
@@ -149,7 +164,7 @@ define [
       resize: new ResizingGrid options
       reorder: new ColumnReordering options, @tableRightViewport
       reset: () ->
-        @sort.insertSortBlocks()
+        @sort.setSorting()
         @resize.setGrid()
         @reorder.buildHierarchy()
 
