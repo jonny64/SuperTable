@@ -1,12 +1,15 @@
 define ['underscore', 'jquery'], (_, $) ->
   class ColumnReordering
-    constructor: (options) ->
+    constructor: (options, mainViewport) ->
       @dragConfig =
         threshold: 10
+        scrollEdge: 50
+        maxScrollSpeed: 50
 
       @app = options.app
       @el = options.container
       @$el = $(@el)
+      @mainViewport = mainViewport
 
       @$el.on 'mousedown', 'th', @_onMouseDown
       $(document).on 'mousemove', @_onMouseMove
@@ -17,13 +20,15 @@ define ['underscore', 'jquery'], (_, $) ->
       @initState =
         x: e.clientX
         y: e.clientY
+        scrollInit: @el.scrollLeft
         el: e.currentTarget
 
     _onMouseMove: (e) =>
       return unless @initState
       if @dragEvent
-        @_setDivPos(e, @dragEvent)
-        @_calcTable(@dragEvent)
+        @polling = false
+        clearTimeout(@dragPoll) if @dragPoll
+        @doDrag(e.clientX)
       else if (Math.abs(@initState.x - e.clientX) > @dragConfig.threshold or
               Math.abs(@initState.y - e.clientY) > @dragConfig.threshold)
          @app.cancelSelection()
@@ -53,6 +58,13 @@ define ['underscore', 'jquery'], (_, $) ->
       @app.cancelSelection()
       @dragEvent = null
 
+    doDrag: (x) =>
+      return unless @dragEvent
+      @_scrollHeader(x)
+      @_setDivPos(x, @dragEvent)
+      @_calcTable(@dragEvent)
+      @dragPoll = setTimeout(@doDrag, 100, x) if @polling
+
     _dragDiv: (initState, pos) ->
       el = initState.el
       rect = el._reorder.boundingRect
@@ -62,13 +74,14 @@ define ['underscore', 'jquery'], (_, $) ->
       div.style.height = "#{rect.bottom - rect.top}px"
       div
 
-    _setDivPos: (e, dragEvent) ->
-      pos = @_divPos(e, dragEvent)
+    _setDivPos: (x, dragEvent) ->
+      pos = @_divPos(x, dragEvent)
       dragEvent.dragDiv.style.top = "#{pos.y}px"
       dragEvent.dragDiv.style.left = "#{pos.x}px"
 
-    _divPos: (e, dragEvent) ->
-      x = dragEvent.oldPos.left + (e.clientX - dragEvent.initState.x)
+    _divPos: (x, dragEvent) =>
+      scrollOffset = @el.scrollLeft - dragEvent.initState.scrollInit
+      x = dragEvent.oldPos.left + (x + scrollOffset - dragEvent.initState.x)
 
       y: dragEvent.oldPos.top
       x: _.min([_.max([x, dragEvent.boundaries.left]),
@@ -189,3 +202,19 @@ define ['underscore', 'jquery'], (_, $) ->
     _restorePosition: (drag) =>
       @_insertBefore(drag.initState.el, @_prevPosition) if typeof @_prevPosition != 'undefined'
       @_prevPosition = undefined
+
+    _scrollHeader: (x) =>
+      rect = @el.getBoundingClientRect()
+      leftEdge = rect.left + @dragConfig.scrollEdge
+      rightEdge = rect.right - @dragConfig.scrollEdge
+      if x < leftEdge
+        @el.scrollLeft = @el.scrollLeft - @_scrollSpeed(leftEdge - x)
+        @mainViewport.scrollLeft = @el.scrollLeft
+        @polling = true
+      else if x > rightEdge
+        @el.scrollLeft = @el.scrollLeft + @_scrollSpeed(x - rightEdge)
+        @mainViewport.scrollLeft = @el.scrollLeft
+        @polling = true
+
+    _scrollSpeed: (dist) =>
+      Math.floor(_.max([dist, @dragConfig.scrollEdge]) / @dragConfig.scrollEdge * @dragConfig.maxScrollSpeed)

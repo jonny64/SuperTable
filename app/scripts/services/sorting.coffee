@@ -2,7 +2,7 @@ define [
   'underscore',
   'jquery',
   'backbone',
-  'templates/_sort_block'], (_, $, Backbone, template) ->
+  'templates/_sort_block'], (_, $, Backbone) ->
   class Sorting
     constructor: (options) ->
       _.extend @, Backbone.Events
@@ -12,14 +12,6 @@ define [
       @_assignHandlers()
       @setSorting()
       @listenTo @model, 'change:order', @setSorting
-
-    insertSortBlocks: ->
-      tds = @$container.find('td.sortable, th.sortable')
-      templateHtml = template()
-
-      tds.each (i, td) ->
-        $(td).append(templateHtml)
-      @setSorting()
 
     _assignHandlers: =>
       @$container.on 'click', '[data-order-dir]', @_onClickSort
