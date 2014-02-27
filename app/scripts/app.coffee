@@ -3,9 +3,9 @@ define [
   'backbone',
   'models/table',
   'views/layout',
-  'services/page_fetching',
-  'services/table_state_api'
-], (_, Backbone, TableModel, LayoutView, PageFetchingService, TableStateApi) ->
+  'services/table_state',
+  'services/table_api'
+], (_, Backbone, TableModel, LayoutView, TableState, TableAPI) ->
 
   class App
     version: '0.1.2'
@@ -26,24 +26,26 @@ define [
 
       layoutView.render()
 
-      pageFetchingService = new PageFetchingService
-        app: @
-        table: table
-        pageUrl: options.pageUrl
-
-      tableStateApi = new TableStateApi
+      tableState = new TableState
         app: @
         table: table
         el: layoutView.table.tableContainer
 
-      pageFetchingService.getTable()
+      tableAPI = new TableAPI
+        app: @
+        table: table
+        tableState: tableState
+        pageUrl: options.pageUrl
+
+
+      tableAPI.getPage()
 
     elWidth: (obj) ->
       Math.max obj.clientWidth, obj.offsetWidth, obj.scrollWidth
 
     elHeight: (obj) ->
       Math.max obj.clientHeight, obj.offsetHeight, obj.scrollHeight
-      
+
     cancelSelection: ->
       if document.selection
         document.selection.empty()

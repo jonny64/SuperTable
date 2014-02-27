@@ -52,11 +52,18 @@ define ['underscore', 'jquery'], (_, $) ->
     _onMouseUp: (e) =>
       @initState = null
       return unless @dragEvent
-      @_restorePosition(@dragEvent) unless @el.contains(e.target)
+      if @el.contains(e.target)
+        @app.trigger 'table:reorder' if @_changedPos()
+      else
+        @_restorePosition(@dragEvent)
       @_unmarkGroup()
       @el.removeChild @dragEvent.dragDiv
       @app.cancelSelection()
       @dragEvent = null
+
+    _changedPos: =>
+      typeof @_prevPosition != "undefined" and
+      @dragEvent.initState.el.nextSibling != @_prevPosition
 
     doDrag: (x) =>
       return unless @dragEvent
@@ -89,9 +96,6 @@ define ['underscore', 'jquery'], (_, $) ->
 
     buildHierarchy: =>
       table = @el.querySelector('table')
-      trs = table.querySelectorAll('tr')
-      _(trs).each (tr, ind) ->
-        tr.setAttribute 'data-row-index', ind
       tds = table.querySelectorAll('th, td')
       # count positions/widths
       w = _(tds).map (td) ->
@@ -197,7 +201,7 @@ define ['underscore', 'jquery'], (_, $) ->
       @_insertBefore(el, next.nextSibling)
 
     _savePosition: (pos) =>
-      @_prevPosition = pos
+      @_prevPosition = pos || null
 
     _restorePosition: (drag) =>
       @_insertBefore(drag.initState.el, @_prevPosition) if typeof @_prevPosition != 'undefined'
