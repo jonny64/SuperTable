@@ -1,0 +1,67 @@
+$sansFontFamily: 'HelveticaNeue', 'Helvetica', Arial, sans-serif
+$baseFontFamily: $sansFontFamily
+
+$serifFontFamily: 'PT Serif', 'Georgia', 'Geneva', serif
+
+$headingsFontFamily: $sansFontFamily
+$headingsLineHeight: 1.3em
+
+$baseFontSize: 14px
+//$baseLineHeight: $baseFontSize * 1.3
+$baseLineHeight: 1.3em
+
+$largeTextFontSize: 24px
+$largeHeaderFontSize: 36px
+
+$compactTextFontSize: $baseFontSize / 1.5
+$compactLineHeight: 1.3em
+$compactHeaderFontSize: $compactTextFontSize * 1.6
+
+$rem: $baseFontSize
+
+$articleFontFamily: $serifFontFamily
+$articleFontSize: $baseFontSize
+$articleFontWeight: normal
+$articleLineHeight: $baseLineHeight
+$smallFontSize: 12px
+$smallHeaderSize: 13px
+
+%large-subheader-serif
+  @extend %large-subheader
+  @extend %serif-font
+
+%compact-header
+  font-size: $compactHeaderFontSize
+  line-height: $baseLineHeight
+
+%compact-text
+  font-size: $compactTextFontSize
+  line-height: $baseLineHeight
+
+body
+  font-family: $baseFontFamily
+  font-size: $baseFontSize
+  line-height: $baseLineHeight
+  font-weight: normal
+
+
+
+textarea
+  font-size: $rem
+
+h1, h2, h3, h4, h5, h6
+  //text-shadow: 0 1px 0 $white
+  font-family: $headingsFontFamily
+  font-weight: bold
+  line-height: $headingsLineHeight
+
+@each $s in h1 3, h2 2.5, h3 2, h4 1.5, h5 1.2, h6 0.9
+  #{nth($s,1)}
+    font-size: $baseFontSize * nth($s,2)
+
+@each $weight in (light 100, normal 300, medium 500, bold 700, black 900)
+  .font-weight-#{nth($weight,1)}
+    font-weight: nth($weight,2)
+
+
+
