@@ -1,7 +1,13 @@
 @import bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/variables
+@import variables
 @import bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/mixins
+@import bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/scaffolding
+@import bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/type
 @import fonts
 @import include
+
+body
+  overflow: hidden
 
 .main-container
   display: table
@@ -182,8 +188,9 @@ table.st-table-pre-render
 .st-drag-div
   cursor: ew-resize
   border: 0
-  outline: 1px solid darkblue
-  background-color: rgba(153, 255, 255, 0.2)
+  //outline: 1px solid darkblue
+  //background-color: rgba(153, 255, 255, 0.2)
+  background-color: rgba($linkColor, 0.5)
   position: absolute
   padding: 0
   overflow: hidden
