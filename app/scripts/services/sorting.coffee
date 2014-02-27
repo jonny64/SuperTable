@@ -23,14 +23,14 @@ define [
       clickedDir = $el.data('order-dir')
       sort = {}
       order = _.clone(@model.get('order'))
-      unless $el.hasClass("active")
+      if !$el.hasClass("active") or _.size(order) > 1
         sort[orderId] = clickedDir
       if e.ctrlKey
         order[orderId] = clickedDir
         @model.set 'order', order
       else
         @model.set 'order', sort
-      @app.trigger 'sort:click'
+      @app.trigger 'table:sort'
 
     setSorting: =>
       @$container.find("div.st-sort-block > span[data-order-dir]").removeClass("active")

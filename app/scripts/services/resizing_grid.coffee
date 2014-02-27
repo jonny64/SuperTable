@@ -8,10 +8,12 @@ define ['underscore', 'jquery'], (_, $) ->
       @holder = null
 
     setGrid: ->
-      @$container[0].removeChild @holder if @holder
+      container = @$container[0]
+      if container.contains(@holder)
+        container.removeChild @holder
       @holder = @resizeHolder()
       @widthCols = {}
-      table = @$container[0].querySelector('table')
+      table = container.querySelector('table')
       @$container.find('tr .st-table-column-holder').each((ind, el) =>
         right = el.offsetLeft + @app.elWidth(el)
         @widthCols[right] = el)
@@ -29,7 +31,7 @@ define ['underscore', 'jquery'], (_, $) ->
         resizeBlock._resize.width = td.clientWidth
         resizeBlock._resize.colsClasses = @_getWidthColumns(td)
         @holder.appendChild resizeBlock )
-      @$container[0].appendChild @holder
+      container.appendChild @holder
 
     resizeHolder: =>
       div = document.createElement('div')

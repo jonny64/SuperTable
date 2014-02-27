@@ -98,7 +98,7 @@ define [
           div = table.parentElement
           div.style.width = "#{@app.elWidth(table) + extraWidth}px"
         @rightExts.reorder.buildHierarchy()
-      @app.trigger 'sync:widths'
+      @app.trigger 'table:widths'
 
     _onScroll: (e) =>
       return unless @tableRightViewport
@@ -130,6 +130,8 @@ define [
       @_startSpinner()
 
       tables = new SplitTable(data, @tableDefaults, @model, @insertSortBlocks)
+      @_numerateRows(tables.top.left)
+      @_numerateRows(tables.top.right)
 
       @log 'insert header'
       if tables.top.left
@@ -157,6 +159,11 @@ define [
       @_tableRendered = true
       @_setPanesSize()
       @_stopSpinner()
+
+    _numerateRows: (table, offset=0) ->
+      trs = table?.querySelectorAll('tr')
+      _(trs).each (tr, ind) ->
+        tr.setAttribute 'data-row-index', ind + offset
 
     _assignExtensions: (container) =>
       options = { app: @options.app, model: @model, container: container }

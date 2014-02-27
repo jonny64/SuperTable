@@ -3,7 +3,8 @@ define ['underscore'], (_) ->
     constructor: (tableHtml, tableDefaults, options, before) ->
       @tableDefaults = tableDefaults
       table = @_createTable(tableHtml)
-      before(table.querySelector('thead'))
+      thead = table.querySelector('thead')
+      before(thead) if thead
       unless options.calculated_dimensions?.headers
         @_insertWidthRulers(table)
         widths = @_countWidths(table)
