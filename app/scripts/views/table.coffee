@@ -161,7 +161,7 @@ define [
       @_stopSpinner()
 
     _numerateRows: (table, offset=0) ->
-      trs = table.querySelectorAll('tr')
+      trs = table?.querySelectorAll('tr')
       _(trs).each (tr, ind) ->
         tr.setAttribute 'data-row-index', ind + offset
 
