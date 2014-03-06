@@ -1,6 +1,5 @@
 @import base
 
-$tableHeaderFontSize: 11px
 %st-table-cell-content
   color: $textColor
   font-size: $baseFontSize
@@ -48,7 +47,6 @@ $tableHeaderFontSize: 11px
 
 // guide to cells highlighting
 
-$headerLevels: 4
 
 @for $i from 1 through $headerLevels
   td.row-cell-header-level#{$i}
@@ -65,3 +63,9 @@ $headerLevels: 4
     height: 0
     padding: 0
     border: 0
+
+
+.table-header
+  background: $grayLighter
+  color: $textColor
+  padding: $tablePadding

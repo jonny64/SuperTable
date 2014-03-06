@@ -27,7 +27,7 @@ body
 // whole table container
 .st-table-container
   position: relative
-  border: 10px solid $grayLighter
+  border: $tablePadding solid $grayLighter
   overflow: hidden
 
 .st-table-container table, tr, td
@@ -130,11 +130,18 @@ table.st-table-pre-render
   padding: 0
 
 .st-btn
-  margin-right: 10px
-  &:active, &:visited
-    color: blue
+  padding: 10px 15px
+  display: inline-block
+  &, &:hover
+    text-decoration: none
+  &, &:active, &:visited
+    color: $linkColor
+  &:hover
+    color: $linkColorHover
   &.disabled
-    color: #dddddd
+    &, &:hover
+      color: lighten($gray, 10%)
+      cursor: default
 
 .st-sort-block
   cursor: pointer
