@@ -32,9 +32,10 @@ $tableHeaderFontSize: 11px
 
 .st-table-header-left-pane,
 .st-table-header-right-pane
+  @extend %st-table-cell
   border-bottom: 4px solid $grayLighter
-  margin-top: -4px
-  th
+  th,
+  td
     font:
       size: $tableHeaderFontSize
       weight: bold
