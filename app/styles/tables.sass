@@ -1,43 +1,45 @@
 $tableHeaderFontSize: 11px
-%st-table-cell
+%st-table-cell-content
   color: $textColor
   font-size: $baseFontSize
   border:
+    top: 0
     right: 1px solid $grayLightest
     bottom: 1px solid $grayLightest
   padding:
     left: $grid-gutter-width / 2
     right: $grid-gutter-width / 2
+    top: 5px
+    bottom: 5px
 
-//.row-cell-header
-  @extend %st-table-cell
-  font:
-    size: $tableHeaderFontSize
-    weight: bold
-  text-transform: uppercase
-  color: $gray
-
-.st-fixed-table-left,
-.st-fixed-table-right
+%st-table-cell
   td,
   th
-    @extend %st-table-cell
+    @extend %st-table-cell-content
+
+.st-table-pre-render
+  @extend %st-table-cell
+
+.st-table-header-left-pane,
+.st-table-header-right-pane
+.st-table-left-viewport,
+.st-table-right-viewport
+  @extend %st-table-cell
+
+.st-table-header-left-pane,
+.st-table-left-viewport
+  border-right: 2px solid $grayLighter
 
 .st-table-header-left-pane,
 .st-table-header-right-pane
   border-bottom: 4px solid $grayLighter
-  margin-top: -3px
+  margin-top: -4px
   th
-    @extend %st-table-cell
     font:
       size: $tableHeaderFontSize
       weight: bold
     text-transform: uppercase
     color: $gray
 
-
-.st-table-header-left-pane,
-.st-table-left-viewport
-  border-right: 2px solid $grayLighter
 
 
