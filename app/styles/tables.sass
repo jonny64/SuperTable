@@ -36,6 +36,7 @@ $tableHeaderFontSize: 11px
 .st-table-header-right-pane
   @extend %st-table-cell
   border-bottom: 4px solid $grayLighter
+  margin-top: -4px
   th,
   td
     font:
@@ -58,3 +59,9 @@ $headerLevels: 4
       text-transform: uppercase
       font-size: $baseFontSize + ($headerLevels/$i + 1) - 2px
       letter-spacing: 1px
+
+.st-table-widths-row
+  td, th
+    height: 0
+    padding: 0
+    border: 0
