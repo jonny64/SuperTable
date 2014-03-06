@@ -42,4 +42,14 @@ $tableHeaderFontSize: 11px
     color: $gray
 
 
+// guide to cells highlighting
 
+@each $i in 1 4px, 2 3px, 3 2px, 4 1px
+  td.row-cell-header-level#{nth($i,1)}
+    background-color: #fff
+    font-size: $baseFontSize + nth($i,2)
+    font-weight: bold
+    @if round(nth($i,1)/2) != nth($i,1)/2
+      text-transform: uppercase
+      font-size: $baseFontSize + nth($i,2) - 2px
+      letter-spacing: 1px

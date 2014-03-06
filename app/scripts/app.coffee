@@ -8,7 +8,7 @@ define [
 ], (_, Backbone, TableModel, LayoutView, TableState, TableAPI) ->
 
   class App
-    version: '0.1.2'
+    version: '0.1.4'
     log: (msg) -> window.console?.log?(msg)
     initialize: (options) ->
       _.extend @, Backbone.Events
