@@ -5,6 +5,7 @@
 @import bootstrap-sass-official/vendor/assets/stylesheets/bootstrap/type
 @import fonts
 @import include
+@import tables
 
 body
   overflow: hidden
@@ -28,9 +29,10 @@ body
   position: relative
   height: 0
 
+// whole table container
 .st-table-container
   position: relative
-  border: 1px solid black
+  border: 10px solid $grayLighter
   overflow: hidden
 
 .st-table-container table, tr, td
@@ -65,7 +67,6 @@ table.st-table-pre-render
   top: 0
   left: 0
   overflow: hidden
-  border-right: 2px solid #eeeeee
 
 .st-table-header-right-pane
   overflow: hidden
@@ -95,7 +96,6 @@ table.st-table-pre-render
   position: absolute
   overflow-y: hidden
   overflow-x: scroll
-  border-right: 2px solid #eeeeee
   left: 0
 
 .st-table-right-viewport
