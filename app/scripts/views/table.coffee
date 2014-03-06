@@ -23,7 +23,7 @@ define [
         columnWidth: 120
         columnMinWidth: 40
         borderWidth: 1
-        rowHeight: 24
+        rowHeight: 28
         width: 0
         height: 0
         extraWidth: 100 # to be able to widen last column

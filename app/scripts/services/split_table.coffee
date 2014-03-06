@@ -27,6 +27,7 @@ define ['underscore'], (_) ->
       div.style.width = '100px'
       div.style.height = '100px'
       div.style.overflow = 'hidden'
+      div.className = 'st-table-pre-render'
       body = document.getElementsByTagName('body').item(0)
       body.appendChild(div)
       div

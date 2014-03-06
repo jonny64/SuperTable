@@ -1,0 +1,71 @@
+@import base
+
+%st-table-cell-content
+  color: $textColor
+  font-size: $baseFontSize
+  border:
+    top: 0
+    right: 1px solid $grayLightest
+    bottom: 1px solid $grayLightest
+  padding:
+    left: $grid-gutter-width / 2
+    right: $grid-gutter-width / 2
+    top: 5px
+    bottom: 5px
+
+%st-table-cell
+  td,
+  th
+    @extend %st-table-cell-content
+
+.st-table-pre-render
+  @extend %st-table-cell
+
+.st-table-header-left-pane,
+.st-table-header-right-pane
+.st-table-left-viewport,
+.st-table-right-viewport
+  @extend %st-table-cell
+
+.st-table-header-left-pane,
+.st-table-left-viewport
+  border-right: 2px solid $grayLighter
+
+.st-table-header-left-pane,
+.st-table-header-right-pane
+  @extend %st-table-cell
+  border-bottom: 4px solid $grayLighter
+  margin-top: -4px
+  th,
+  td
+    font:
+      size: $tableHeaderFontSize
+      weight: bold
+    text-transform: uppercase
+    color: $gray
+
+
+// guide to cells highlighting
+
+
+@for $i from 1 through $headerLevels
+  td.row-cell-header-level#{$i}
+    background-color: #fff
+    font-size: $baseFontSize + ($headerLevels/$i + 1)
+    font-weight: bold
+    @if round($i/2) != $i/2
+      text-transform: uppercase
+      font-size: $baseFontSize + ($headerLevels/$i + 1) - 2px
+      letter-spacing: 1px
+
+.st-table-widths-row
+  td, th
+    height: 0
+    padding: 0
+    border: 0
+
+
+.table-header
+  background: $grayLighter
+  color: $textColor
+  padding: $tablePadding
