@@ -2,6 +2,7 @@
 @import include
 @import tables
 
+
 body
   overflow: hidden
 
@@ -27,8 +28,14 @@ body
 // whole table container
 .st-table-container
   position: relative
-  border: $tablePadding solid $grayLighter
   overflow: hidden
+  left: $tablePadding
+  right: $tablePadding
+  background: #fff
+
+.table-container
+  padding: $tablePadding
+  background: $grayLighter
 
 .st-table-container table, tr, td
   border-spacing: 0
