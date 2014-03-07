@@ -198,7 +198,10 @@ define [
 
       @tableContainer.style.width = "#{@containerWidth}px"
       @tableContainer.style.height = "#{@containerHeight}px"
-
+      
+      paneStyle = getComputedStyle(@headerLeftPane,null)
+      leftBordersWidth = parseInt(paneStyle.getPropertyValue('border-right-width'), 10) + parseInt(paneStyle.getPropertyValue('border-left-width'), 10)
+      @leftWidth += leftBordersWidth
       @headerLeftPane.style.width = "#{@leftWidth}px"
       @headerRightPane.style.left = "#{@leftWidth}px"
       @headerRightPane.style.width = "#{rightPaneWidth}px"
