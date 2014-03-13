@@ -3,13 +3,14 @@
 %st-table-cell-content
   color: $textColor
   font-size: $baseFontSize
+  background-color: #fff
   border:
     top: 0
     right: 1px solid $grayLightest
     bottom: 1px solid $grayLightest
   padding:
-    left: $grid-gutter-width / 2
-    right: $grid-gutter-width / 2
+    left: 5px
+    right: 5px
     top: 5px
     bottom: 5px
 
@@ -17,6 +18,12 @@
   td,
   th
     @extend %st-table-cell-content
+
+.st-table-container
+  a
+    color: $linkColor
+    &:hover
+      color: $linkColorHover
 
 .st-table-pre-render
   @extend %st-table-cell
