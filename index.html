@@ -1,0 +1,47 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>SuperTable Demo</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+        <link rel="stylesheet" href="styles/aab1dbd9.main.css">
+        <script src="scripts/vendor/be96b27f.modernizr.js"></script>
+    </head>
+    <body>
+        <div id="layout-container"></div>
+
+        <div class="container">
+          <hr/>
+          Версия:
+          <span id='app_version'>?</span>
+          &nbsp;&nbsp;&nbsp;
+          <a href="styleguide.html">Примеры стилей в таблице</a>
+          <hr/>
+          <a href='http://jenkins.icfdev.ru/job/SuperTable/'><img src='http://jenkins.icfdev.ru/buildStatus/icon?job=SuperTable'></a>
+        </div>
+        <script src="scripts/0d25e6fa.main.js"></script>
+        <script type="text/javascript">
+          var options = {
+              tableUrl: 'data/table#{page}.json',
+              el: '#layout-container'
+          };
+          if (typeof require == 'function') {
+            // running in development
+            require(['main'], function(SuperTable){
+              SuperTable.initialize(options);
+              document.getElementById('app_version').textContent = SuperTable.version;
+            });
+          } else {
+            // running in production
+            window.SuperTable.initialize(options);
+            document.getElementById('app_version').textContent = window.SuperTable.version;
+          }
+        </script>
+</body>
+</html>
