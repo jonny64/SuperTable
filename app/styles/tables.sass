@@ -82,13 +82,27 @@ $status2Color: #ccffc2
 $status3Color: #dbedff
 $status4Color: lighten(#e5ccff, 3%)
 
-$cellStatusColors: alert lighten($red, 15%) darken($red, 50%), inactive $grayLightest lighten($textColor,20%), status_1 $status1Color $textColor, status_2 $status2Color $textColor, status_3 $status3Color $textColor, status_4 $status4Color $textColor
+$statusDeletedBackground: lighten($red, 15%)
+$statusDeletedTextColor: darken($red, 30%)
+
+$statusAlertBackground: lighten($orange, 15%)
+$statusAlertTextColor: darken($orange, 50%)
+
+$cellStatusColors: deleted $statusDeletedBackground $statusDeletedTextColor, alert $statusAlertBackground $statusAlertTextColor, inactive $grayLightest lighten($textColor,20%), status_1 $status1Color $textColor, status_2 $status2Color $textColor, status_3 $status3Color $textColor, status_4 $status4Color $textColor
 
 @each $st in $cellStatusColors
   td.row-cell-state-#{nth($st, 1)}
     background-color: nth($st, 2)
     color: nth($st, 3)
-    border-color: desaturate(darken(nth($st, 2), 10%), 30%)
+    border-color: desaturate(darken(nth($st, 2), 10%), 10%)
+
+td.row-cell-state-deleted
+  border:
+    @each $b in top, bottom
+      #{$b}:
+        width: 2px
+        style: dashed
+
 
 // utilities styles
 @each $align in left, center, right
