@@ -52,27 +52,48 @@
     color: $gray
 
 
-// guide to cells highlighting
-
-
-@for $i from 1 through $headerLevels
-  td.row-cell-header-level#{$i}
-    background-color: #fff
-    font-size: $baseFontSize + ($headerLevels/$i + 1)
-    font-weight: bold
-    @if round($i/2) != $i/2
-      text-transform: uppercase
-      font-size: $baseFontSize + ($headerLevels/$i + 1) - 2px
-      letter-spacing: 1px
-
 .st-table-widths-row
   td, th
     height: 0
     padding: 0
     border: 0
 
-
 .table-header
   background: $grayLighter
   color: $textColor
   padding: $tablePadding
+
+// guide to cells highlighting
+@for $i from 1 through $headerLevels
+  td.row-cell-header-level#{$i}
+    font-weight: bold
+    @if round($i/2) != $i/2
+      font-size: $baseFontSize + ($headerLevels/$i)
+    @else
+      text-transform: uppercase
+      font-size: $baseFontSize + ($headerLevels/$i) - 2px
+      //letter-spacing: 1px
+
+// special cells styles
+//@each $state in alert, inactive
+
+$status1Color: #ffffcc
+$status2Color: #ccffc2
+$status3Color: #dbedff
+$status4Color: lighten(#e5ccff, 3%)
+
+$cellStatusColors: alert lighten($red, 15%) darken($red, 50%), inactive $grayLightest lighten($textColor,20%), status_1 $status1Color $textColor, status_2 $status2Color $textColor, status_3 $status3Color $textColor, status_4 $status4Color $textColor
+
+@each $st in $cellStatusColors
+  td.row-cell-state-#{nth($st, 1)}
+    background-color: nth($st, 2)
+    color: nth($st, 3)
+    border-color: desaturate(darken(nth($st, 2), 10%), 30%)
+
+// utilities styles
+@each $align in left, center, right
+  .text-#{$align}
+    text-align: $align
+
+
+
