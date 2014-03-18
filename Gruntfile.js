@@ -305,6 +305,12 @@ module.exports = function (grunt) {
                 files: {
                     '<%= yeoman.dist %>/index.html': '<%= yeoman.app %>/index.html'
                 }
+            },
+            lib: {
+                files: {
+                    'lib/supertable.js': '<%= yeoman.dist %>/scripts/main.js',
+                    'lib/supertable.css': '<%= yeoman.dist %>/styles/main.css'
+                }
             }
         },
         bower: {
@@ -418,6 +424,7 @@ module.exports = function (grunt) {
         'cssmin',
         'uglify',
         'copy:dist',
+        'copy:lib',
         'rev',
         'usemin'
     ]);
