@@ -1,7 +1,16 @@
 {
-  "name": "webapp-template",
-  "version": "0.0.0",
-  "dependencies": {
+  "name": "SuperTable",
+  "version": "0.0.1",
+  "main": [
+    "/lib/supertable.js",
+    "/lib/supertable.css"
+  ],
+  "ignore": [
+    "!/lib/supertable.js",
+    "!/lib/supertable.css"
+  ],
+  "dependencies": {},
+  "devDependencies": {
     "bootstrap-sass-official": "~3.1.1",
     "jquery": "~1.9.0",
     "rolejs": "https://github.com/kossnocorp/role.git#1.3.1",
@@ -11,6 +20,5 @@
     "requirejs-text": "~2.0.5",
     "modernizr": "~2.6.2",
     "spinjs": "~1.3.3"
-  },
-  "devDependencies": {}
+  }
 }
