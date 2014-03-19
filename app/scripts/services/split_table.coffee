@@ -1,11 +1,12 @@
 define ['underscore'], (_) ->
   class SplitTable
-    constructor: (tableHtml, tableDefaults, options, before) ->
+    constructor: (tableHtml, tableDefaults, model, before) ->
       @tableDefaults = tableDefaults
       table = @_createTable(tableHtml)
+      @model = model
       thead = table.querySelector('thead')
       before(thead) if thead
-      unless options.calculated_dimensions?.headers
+      unless @model.get('calculated_dimensions')?.headers
         @_insertWidthRulers(table)
         widths = @_countWidths(table)
 
@@ -56,7 +57,10 @@ define ['underscore'], (_) ->
           trRight.style.height = "#{rowHeight}px"
           left.appendChild(trLeft)
           right.appendChild(trRight)
-          flag = true
+          if @model.get('fix_columns') == 0
+            flag = false
+          else
+            flag = true
           height = height + rowHeight
           ind = 0
           _(tr.querySelectorAll('td, th')).each((td) =>
