@@ -1,6 +1,7 @@
 define ['underscore'], (_) ->
   class SplitTable
-    constructor: (tableHtml, tableDefaults, model, before) ->
+    constructor: (container, tableHtml, tableDefaults, model, before) ->
+      @container = container
       @tableDefaults = tableDefaults
       table = @_createTable(tableHtml)
       @model = model
@@ -29,8 +30,8 @@ define ['underscore'], (_) ->
       div.style.height = '100px'
       div.style.overflow = 'hidden'
       div.className = 'st-table-pre-render'
-      body = document.getElementsByTagName('body').item(0)
-      body.appendChild(div)
+      #body = document.getElementsByTagName('body').item(0)
+      @container.appendChild(div)
       div
 
     _splitTable: (table, widths, scrollWidth=0) =>
@@ -132,5 +133,6 @@ define ['underscore'], (_) ->
       result = []
       for cell in table.querySelector('tr.st-table-widths-row').querySelectorAll('td')
         result.push @_elWidth(cell) if cell.className != 'freezbar-cell'
-      document.getElementsByTagName('body').item(0).removeChild(div)
+      #document.getElementsByTagName('body').item(0).removeChild(div)
+      @container.removeChild(div)
       result

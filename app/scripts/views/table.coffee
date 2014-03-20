@@ -129,7 +129,7 @@ define [
       @log 'render container'
       @_startSpinner()
 
-      tables = new SplitTable(data, @tableDefaults, @model, @insertSortBlocks)
+      tables = new SplitTable(@el, data, @tableDefaults, @model, @insertSortBlocks)
       @_numerateRows(tables.top.left)
       @_numerateRows(tables.top.right)
 
