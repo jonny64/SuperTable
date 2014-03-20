@@ -7,6 +7,7 @@
   ],
   "ignore": [
     "!/lib/supertable.js",
+    "!/lib/supertable.min.js",
     "!/lib/supertable.css"
   ],
   "dependencies": {},
