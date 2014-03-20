@@ -34,7 +34,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @_fetchPage {data: data, method: 'POST'}
 
     _withDefaults: (options) =>
-      data = _.extend({ id: @table.get('id'), start: @table.start() || 0},
+      data = _.extend({ start: @table.start() || 0},
                       options.data,
                       @table.get('datasource_params'))
       _.extend({}, {data: data, type: 'page', method: 'GET'}, _.omit(options, 'data'))
