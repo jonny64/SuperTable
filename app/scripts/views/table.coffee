@@ -193,12 +193,12 @@ define [
       scrollWidth = @_scrollBarWidth()
       borderWidth = @tableDefaults.borderWidth
 
-      rightPaneWidth = _.min([@containerWidth - @leftWidth, @rightWidth + scrollWidth])
+      rightPaneWidth = @containerWidth - @leftWidth #_.min([@containerWidth - @leftWidth, @rightWidth + scrollWidth])
       paneHeight = @containerHeight - @headerHeight
 
       @tableContainer.style.width = "#{@containerWidth}px"
       @tableContainer.style.height = "#{@containerHeight}px"
-      
+
       paneStyle = getComputedStyle(@headerLeftPane,null)
       leftBordersWidth = parseInt(paneStyle.getPropertyValue('border-right-width'), 10) + parseInt(paneStyle.getPropertyValue('border-left-width'), 10)
       @leftWidth += leftBordersWidth
