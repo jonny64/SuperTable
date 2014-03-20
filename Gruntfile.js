@@ -309,6 +309,11 @@ module.exports = function (grunt) {
             lib: {
                 files: {
                     'lib/supertable.js': '<%= yeoman.dist %>/scripts/main.js',
+                }
+            },
+            libMin: {
+                files: {
+                    'lib/supertable.min.js': '<%= yeoman.dist %>/scripts/main.js',
                     'lib/supertable.css': '<%= yeoman.dist %>/styles/main.css'
                 }
             }
@@ -421,10 +426,11 @@ module.exports = function (grunt) {
         'imagemin',
         'htmlmin',
         'concat',
+        'copy:lib',
         'cssmin',
         'uglify',
         'copy:dist',
-        'copy:lib',
+        'copy:libMin',
         'rev',
         'usemin'
     ]);
