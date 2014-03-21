@@ -18,6 +18,19 @@ define [
   sortTemplate ) ->
   class TableView extends Backbone.View
     el: '@table-container'
+    events:
+      'click [data-href]': '_onClickDataHref'
+
+    _onClickDataHref: (e) ->
+      e.stopPropagation()
+      el = e.currentTarget
+      data = el.getAttribute 'data-href'
+      if parseData = data.match /^javascript:(.*)/m
+        [prefix, jscode] = parseData
+        eval(jscode)
+      else
+        window.location.href = data
+
     initialize: ->
       @tableDefaults =
         columnWidth: 120
