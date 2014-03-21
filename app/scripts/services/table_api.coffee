@@ -27,8 +27,8 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @pageUrl = options.pageUrl
       @table = options.table
 
-    getPage: (start=0, type) =>
-      @_fetchPage {data: {start: start}, type: type}
+    getPage: (start=0, fetchType='page') =>
+      @_fetchPage {data: {start: start}, fetchType: fetchType}
 
     postPage: (data) =>
       @_fetchPage {data: data, method: 'POST'}
@@ -37,12 +37,12 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       data = _.extend({ start: @table.start() || 0},
                       options.data,
                       @table.get('datasource_params'))
-      _.extend({}, {data: data, type: 'page', method: 'GET'}, _.omit(options, 'data'))
+      _.extend({}, {data: data, fetchType: 'page', method: 'GET'}, _.omit(options, 'data'))
 
     _fetchPage: (options) =>
       options = @_withDefaults(options)
       @log 'fetching page'
-      @table.set 'fetchType', options.type
+      @table.set 'fetchType', options.fetchType
       @app.trigger 'page:loading'
       #TODO table.fetchPage with calculated url
       @table.fetch
