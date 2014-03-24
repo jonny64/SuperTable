@@ -6,7 +6,14 @@
 
 // Display in IE6-9 and FF3
 // -------------------------
-@mixin bootstrapReset() 
+@mixin bootstrapReset()
+  &,
+  table,
+  tr,
+  td,
+  th
+    white-space: normal
+
   article,
   aside,
   details,
