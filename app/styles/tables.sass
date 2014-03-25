@@ -74,21 +74,37 @@
       font-size: $baseFontSize + ($headerLevels/$i) - 2px
       //letter-spacing: 1px
 
+td[data-href],
+tr[data-href] td
+  @extend a
+  cursor: pointer
+
+tr[data-href]
+  &:hover
+    td
+      @extend a:hover
+
 // special cells styles
 //@each $state in alert, inactive
 
 $status1Color: #ffffcc
 $status2Color: #ccffc2
 $status3Color: #dbedff
-$status4Color: lighten(#e5ccff, 3%)
+$status4Color: adjust-hue(lighten(#e5ccff, 3%), 20%)
 
-$statusDeletedBackground: lighten($red, 15%)
-$statusDeletedTextColor: darken($red, 30%)
+$statusDeletedBackground: $grayLighter
+$statusDeletedTextColor: lighten($textColor, 10%)
 
 $statusAlertBackground: lighten($orange, 15%)
 $statusAlertTextColor: darken($orange, 50%)
 
-$cellStatusColors: deleted $statusDeletedBackground $statusDeletedTextColor, alert $statusAlertBackground $statusAlertTextColor, inactive $grayLightest lighten($textColor,20%), status_1 $status1Color $textColor, status_2 $status2Color $textColor, status_3 $status3Color $textColor, status_4 $status4Color $textColor
+$statusErrorBackground: lighten($red, 20%)
+$statusErrorTextColor: darken($red, 30%)
+
+$statusVisitedBackground: lighten(desaturate($violet, 55%), 65%)
+$statusVisitedTextColor: lighten($violet, 10%)
+
+$cellStatusColors: error $statusErrorBackground $statusErrorTextColor, visited $statusVisitedBackground $statusVisitedTextColor, deleted $statusDeletedBackground $statusDeletedTextColor, alert $statusAlertBackground $statusAlertTextColor, inactive $grayLightest lighten($textColor,20%), status_1 $status1Color $textColor, status_2 $status2Color $textColor, status_3 $status3Color $textColor, status_4 $status4Color $textColor
 
 @each $st in $cellStatusColors
   td.row-cell-state-#{nth($st, 1)}
@@ -96,18 +112,25 @@ $cellStatusColors: deleted $statusDeletedBackground $statusDeletedTextColor, ale
     color: nth($st, 3)
     border-color: desaturate(darken(nth($st, 2), 10%), 10%)
 
-td.row-cell-state-deleted
-  border:
-    @each $b in top, bottom
-      #{$b}:
-        width: 2px
-        style: dashed
 
+
+td.row-cell-state-deleted
+  +status-cell-border(2px, dashed)
+  background:
+    image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIW2PcuHHjfwAHQgMUXULq1wAAAABJRU5ErkJggg==')
+    repeat: repeat-x
+    position: left 50%
+
+td.row-cell-state-error
+  +status-cell-border(2px, solid)
+
+td.row-cell-state-visited
+  +status-cell-border(2px, solid)
+  border-color: desaturate(lighten($violet, 50%), 50%)
 
 // utilities styles
 @each $align in left, center, right
   .text-#{$align}
     text-align: $align
-
 
 
