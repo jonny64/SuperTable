@@ -7,14 +7,14 @@ define ['underscore'], (_) ->
       @model = model
       thead = table.querySelector('thead')
       before(thead) if thead
-      unless @model.get('calculated_dimensions')?.headers
-        @_insertWidthRulers(table)
-        widths = @_countWidths(table)
+      #unless @model.get('calculated_dimensions')?.headers
+      @_insertWidthRulers(table)
+      [widths, headHeights, bodyHeights] = @_countDims(table)
 
       @top = @_splitTable(table.querySelector('thead'),
-                          widths,
+                          widths, headHeights,
                           tableDefaults.scrollBarWidth)
-      @bottom = @_splitTable(table.querySelector('tbody'), widths)
+      @bottom = @_splitTable(table.querySelector('tbody'), widths, bodyHeights)
 
     _createTable: (html) ->
       div = document.createElement('div')
@@ -34,7 +34,7 @@ define ['underscore'], (_) ->
       @container.appendChild(div)
       div
 
-    _splitTable: (table, widths, scrollWidth=0) =>
+    _splitTable: (table, widths, heights, scrollWidth=0) =>
       height = 0
       widthLeft = 0
       widthRight = 0
@@ -47,13 +47,10 @@ define ['underscore'], (_) ->
         right = left.cloneNode()
         right.className = 'st-fixed-table-right'
         rightDiv = document.createElement('div')
-        _(table.querySelectorAll('tr')).each((tr) =>
+        _(table.querySelectorAll('tr')).each((tr, trIndex) =>
           trLeft = tr.cloneNode()
           trRight = tr.cloneNode()
-          rowHeight = if tr.className == 'st-table-widths-row'
-              0
-            else
-              @tableDefaults.rowHeight
+          rowHeight = heights[trIndex]
           trLeft.style.height = "#{rowHeight}px"
           trRight.style.height = "#{rowHeight}px"
           left.appendChild(trLeft)
@@ -96,7 +93,7 @@ define ['underscore'], (_) ->
 
     _insertWidthRulers: (table) =>
       tableWidth = 0
-      splitAt = 0
+      splitAt = null
       col = 0
       for cell, ind in table.querySelector('tr').querySelectorAll('th, td')
         if cell.className == 'freezbar-cell' then splitAt = ind
@@ -127,12 +124,16 @@ define ['underscore'], (_) ->
     _elHeight: (obj) ->
       Math.max obj.clientHeight, obj.offsetHeight, obj.scrollHeight
 
-    _countWidths: (table) =>
+    _countDims: (table) =>
       div = @_preRender()
       div.appendChild table
-      result = []
+      widths = []
       for cell in table.querySelector('tr.st-table-widths-row').querySelectorAll('td')
-        result.push @_elWidth(cell) if cell.className != 'freezbar-cell'
+        widths.push @_elWidth(cell) if cell.className != 'freezbar-cell'
+
+      headHeights = (@_elHeight(row) for row in table.querySelectorAll('thead tr'))
+      bodyHeights = (@_elHeight(row) for row in table.querySelectorAll('tbody tr'))
+
       #document.getElementsByTagName('body').item(0).removeChild(div)
       @container.removeChild(div)
-      result
+      [widths, headHeights, bodyHeights]
