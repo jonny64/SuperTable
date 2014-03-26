@@ -3,6 +3,9 @@ define ['underscore', 'backbone'], (_, Backbone) ->
     constructor: (options) ->
       {@app, @el, @table} = options
 
+    columnsStr: =>
+      JSON.stringify(@columns())
+
     columns: =>
       leftHeader = @el.querySelector('.st-table-header-left-pane table.st-fixed-table-left')
       rightHeader = @el.querySelector('.st-table-header-right-pane table.st-fixed-table-right')
@@ -39,7 +42,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
           sort.asc = '1'
         else if td.querySelector('div.st-sort-block span[data-order-dir="desc"]').className == 'active'
           sort.desc = '1'
-          
+
       _.extend {
         id: td.id,
         width: td.clientWidth,

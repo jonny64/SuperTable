@@ -17,11 +17,11 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         if !@table.firstPage()
           @getPage(@table.prevPage())
       @listenTo options.app, 'table:sort', =>
-        @postPage(action: 'update_columns', sort: 1, columns: state.columns())
+        @postPage(action: 'update_columns', sort: 1, columns: state.columnsStr())
       @listenTo options.app, 'table:reorder', =>
-        @postPage(action: 'update_columns', order: 1, columns: state.columns())
+        @postPage(action: 'update_columns', order: 1, columns: state.columnsStr())
       @listenTo options.app, 'table:widths', =>
-        @_saveState(data: {action: 'update_dimensions', columns: state.columns() })
+        @_saveState(data: {action: 'update_dimensions', columns: state.columnsStr() })
 
       #TODO api object/service
       @pageUrl = options.pageUrl
