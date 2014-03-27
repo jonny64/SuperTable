@@ -1,5 +1,6 @@
 define [
   'underscore',
+  'jquery',
   'backbone',
   'services/split_table',
   'services/sorting',
@@ -9,6 +10,7 @@ define [
   'templates/_sort_block'
   ], (
   _,
+  $,
   Backbone,
   SplitTable,
   Sorting,
@@ -56,6 +58,13 @@ define [
       @_regionsAssigned = false
       @_hitBottom = false
 
+      debounceSize = _.debounce((=>
+        return unless @tableContainer
+        @tableContainer.style.width = '0px'
+        @tableContainer.style.height = '0px'
+        @_setPanesSize()), 300)
+      $(window).resize debounceSize
+
     render: ->
       @log 'render'
       @_scrollBarWidth()
@@ -79,8 +88,6 @@ define [
 
     _assignRegions: =>
       return if @_regionsAssigned
-      @containerWidth = @$el.width()
-      @containerHeight = @$el.height()
 
       @$tableContainer = @$('.st-table-container')
       @tableContainer = @$tableContainer[0]
@@ -168,6 +175,10 @@ define [
       @tableRightViewport.appendChild tables.bottom.right
 
       @tableRightViewport.onscroll = @_onScroll
+      $(@tableLeftViewport).off('mousewheel')
+      $(@tableLeftViewport).on('mousewheel', (e) =>
+        @tableRightViewport.scrollTop -= (e.deltaY * e.deltaFactor) if e.deltaY
+        @_onScroll())
 
       @_tableRendered = true
       @_setPanesSize()
@@ -195,6 +206,9 @@ define [
       @$el.spin(true)
 
     _setPanesSize: =>
+      @containerWidth = @$el.width()
+      @containerHeight = @$el.height()
+
       @log 'set panes size'
       @log "setting sizes for width: #{@containerWidth}, height: #{@containerHeight}"
       @tableDefaults.width = @containerWidth
