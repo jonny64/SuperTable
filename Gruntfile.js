@@ -216,6 +216,7 @@ module.exports = function (grunt) {
                         'templates': '../../.tmp/scripts/templates',
                         'jquery.role': '../../app/bower_components/rolejs/lib/jquery.role',
                         'jquery.spin': '../../app/bower_components/spinjs/jquery.spin',
+                        'jquery-mousewheel': '../../app/bower_components/jquery-mousewheel/jquery.mousewheel',
                         'spin': '../../app/bower_components/spinjs/spin',
                         'jquery': '../../app/bower_components/jquery/jquery',
                         'underscore': '../../app/bower_components/underscore/underscore',
