@@ -7,6 +7,8 @@ define [
   'services/resizing_grid',
   'services/resizing',
   'services/column_reordering',
+  'templates/main_table',
+  'templates/empty_table',
   'templates/_sort_block'
   ], (
   _,
@@ -17,6 +19,8 @@ define [
   ResizingGrid,
   Resizing,
   ColumnReordering,
+  mainTableTemplate,
+  emptyTableTemplate,
   sortTemplate ) ->
   class TableView extends Backbone.View
     el: '@table-container'
@@ -49,8 +53,7 @@ define [
       @listenTo @options.app, 'page:loading', @_startSpinner
       @listenTo @options.app, 'page:loaded', @_stopSpinner
       @listenTo @model, 'change', (model) =>
-        if model.changed.data
-          @_renderContainer(model.get('data'))
+        @render() if model.changed.data
 
       @prevScrollTop = 0
       @prevScrollLeft = 0
@@ -68,9 +71,13 @@ define [
     render: ->
       @log 'render'
       @_scrollBarWidth()
-      @_assignRegions() unless @_regionsAssigned
-      html = @model.get('data')
-      @_renderContainer(html) if html
+      if parseInt(@model.get('cnt'), 10) > 0
+        html = @model.get('data')
+        @$el.html mainTableTemplate()
+        @_assignRegions() unless @_regionsAssigned
+        @_renderContainer(html) if html
+      else
+        @$el.html emptyTableTemplate()
       @
 
     insertSortBlocks: (container) ->
