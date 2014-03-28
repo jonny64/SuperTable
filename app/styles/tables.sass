@@ -3,6 +3,7 @@
 %st-table-cell-content
   color: $textColor
   font-size: $baseFontSize
+  line-height: $baseFontSize + 2px
   background-color: #fff
   border:
     top: 0
@@ -67,11 +68,14 @@
 @for $i from 1 through $headerLevels
   td.row-cell-header-level#{$i}
     font-weight: bold
+    +box-sizing(border-box)
     @if round($i/2) != $i/2
       font-size: $baseFontSize + ($headerLevels/$i)
+      line-height: $baseFontSize + ($headerLevels/$i) + 2px
     @else
       text-transform: uppercase
       font-size: $baseFontSize + ($headerLevels/$i) - 2px
+      line-height: $baseFontSize + ($headerLevels/$i)
       //letter-spacing: 1px
 
 td[data-href],
