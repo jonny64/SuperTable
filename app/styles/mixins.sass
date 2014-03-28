@@ -24,4 +24,19 @@
       width: $width
       style: $style
 
+=inline-icon($icon, $size: 16px, $valign: bottom)
+  content: ""
+  display: inline-block
+  width: $size
+  height: $size
+  vertical-align: $valign
+  background:
+    image: $icon
+    repeat: no-repeat
+
+=inline-icon-background($icon)
+  background:
+    image: $icon
+    repeat: no-repeat
+
 
