@@ -2,6 +2,7 @@ define ['underscore'], (_) ->
   class SplitTable
     constructor: (container, tableHtml, tableDefaults, model, before) ->
       @container = container
+      containerWidth = container.clientWidth
       @tableDefaults = tableDefaults
       table = @_createTable(tableHtml)
       @model = model
@@ -10,11 +11,17 @@ define ['underscore'], (_) ->
       #unless @model.get('calculated_dimensions')?.headers
       @_insertWidthRulers(table)
       [widths, headHeights, bodyHeights] = @_countDims(table)
+      totWidth = _(widths).reduce(((memo, num) -> memo + num), 0)
+      if !@model.get('calculated_dimensions')?.headers and containerWidth > totWidth
+        widths = @_autoExpandWidths(widths, (containerWidth / totWidth))
 
       @top = @_splitTable(table.querySelector('thead'),
                           widths, headHeights,
                           tableDefaults.scrollBarWidth)
       @bottom = @_splitTable(table.querySelector('tbody'), widths, bodyHeights)
+
+    _autoExpandWidths: (widths, k) ->
+      _(widths).map((el) -> Math.round(el* k))
 
     _createTable: (html) ->
       div = document.createElement('div')
