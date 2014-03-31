@@ -73,11 +73,13 @@ define [
       @_scrollBarWidth()
       if parseInt(@model.get('cnt'), 10) > 0
         html = @model.get('data')
-        @$el.html mainTableTemplate()
-        @_assignRegions() unless @_regionsAssigned
+        unless @_regionsAssigned
+          @$el.html mainTableTemplate()
+          @_assignRegions()
         @_renderContainer(html) if html
       else
         @$el.html emptyTableTemplate()
+        @_regionsAssigned = false
       @
 
     insertSortBlocks: (container) ->
@@ -105,12 +107,15 @@ define [
       @headerLeftPane = @tableContainer.querySelector('.st-table-header-left-pane')
       @leftExts = @_assignExtensions(@headerLeftPane)
       @rightExts = @_assignExtensions(@headerRightPane)
-      @resizer = new Resizing(
-        app: @app,
-        "$main": @$el,
-        onResizeCb: @_resizeCb,
-        statOverlay: @staticOverlay,
-        tableDefaults: @tableDefaults) unless @resizer
+      if @resizer
+        @resizer.rebind(statOverlay: @staticOverlay)
+      else
+        @resizer = new Resizing(
+          app: @app,
+          "$main": @$el,
+          onResizeCb: @_resizeCb,
+          statOverlay: @staticOverlay,
+          tableDefaults: @tableDefaults)
       @_regionsAssigned = true
 
     _resizeCb: (tableClass) =>

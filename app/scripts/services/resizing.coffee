@@ -12,6 +12,8 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       @$main.on 'mouseup', @_onMouseUp
       @dragging = false
 
+    rebind: ({@statOverlay}) =>
+
     _onMouseDown: (e) =>
       @$current = $(e.currentTarget)
       @$current.addClass('dragging')
