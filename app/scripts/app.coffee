@@ -29,7 +29,7 @@ define [
       tableState = new TableState
         app: @
         table: table
-        el: layoutView.table.tableContainer
+        el: layoutView.table.el
 
       tableAPI = new TableAPI
         app: @

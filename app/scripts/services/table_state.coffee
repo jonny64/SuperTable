@@ -1,14 +1,13 @@
 define ['underscore', 'backbone'], (_, Backbone) ->
   class TableState
-    constructor: (options) ->
-      {@app, @el, @table} = options
+    constructor: ({@app, @el, @table}) ->
 
     columnsStr: =>
       JSON.stringify(@columns())
 
     columns: =>
-      leftHeader = @el.querySelector('.st-table-header-left-pane table.st-fixed-table-left')
-      rightHeader = @el.querySelector('.st-table-header-right-pane table.st-fixed-table-right')
+      leftHeader = @el.querySelector('.st-table-container .st-table-header-left-pane table.st-fixed-table-left')
+      rightHeader = @el.querySelector('.st-table-container .st-table-header-right-pane table.st-fixed-table-right')
 
       [].concat(@_collectHeaderData(leftHeader))
         .concat(@_collectHeaderData(rightHeader))
