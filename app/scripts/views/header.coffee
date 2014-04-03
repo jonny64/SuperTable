@@ -1,4 +1,5 @@
-define ['backbone', 'templates/header'], (Backbone, template) ->
+define ['backbone', 'templates/header', 'templates/empty_header'],
+(Backbone, template, emptyTemplate) ->
   class FooterView extends Backbone.View
     el: '@header'
     events:
@@ -7,16 +8,22 @@ define ['backbone', 'templates/header'], (Backbone, template) ->
       'click @prev-page': '_onClickPrev'
 
     initialize: ->
-      @listenTo @model, 'change', =>
-        @renderBindVals()
+      @listenTo @model, 'change', @render
       @listenTo @options.app, 'scroll:bottom', =>
         @_enableMore() unless @model.lastPage()
       @listenTo @options.app, 'scroll', @_disableMore
 
-    render: ->
-      @$el.html template()
-      @_assignUi()
-      @renderBindVals()
+    render: =>
+      if @model.get('pager_off')
+        @$el.hide()
+      else
+        @$el.show()
+        if parseInt(@model.get('cnt'), 10) > 0
+          @$el.html template()
+          @_assignUi()
+          @renderBindVals()
+        else
+          @$el.html emptyTemplate(msg: @model.get('empty_label'))
       @
 
     renderBindVals: =>
