@@ -71,15 +71,12 @@ define [
     render: ->
       @log 'render'
       @_scrollBarWidth()
-      if parseInt(@model.get('cnt'), 10) > 0
-        html = @model.get('data')
-        unless @_regionsAssigned
-          @$el.html mainTableTemplate()
-          @_assignRegions()
-        @_renderContainer(html) if html
-      else
-        @$el.html emptyTableTemplate()
-        @_regionsAssigned = false
+
+      html = @model.get('data')
+      unless @_regionsAssigned
+        @$el.html mainTableTemplate()
+        @_assignRegions()
+      @_renderContainer(html) if html
       @
 
     insertSortBlocks: (container) ->
