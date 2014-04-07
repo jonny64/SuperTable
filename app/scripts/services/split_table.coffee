@@ -144,8 +144,8 @@ define ['underscore'], (_) ->
       for cell in table.querySelector('tr.st-table-widths-row').querySelectorAll('td')
         widths.push @_elWidth(cell) if cell.className not in ['freezbar-cell', 'st-row-height-td']
 
-      headHeights = (@_elHeight(td) for td in table.querySelectorAll('thead td.st-row-height-td'))
-      bodyHeights = (@_elHeight(td) for td in table.querySelectorAll('tbody td.st-row-height-td'))
+      headHeights = (@_elHeight(td) for td in table.querySelector('thead').querySelectorAll('td.st-row-height-td'))
+      bodyHeights = (@_elHeight(td) for td in table.querySelector('tbody').querySelectorAll('td.st-row-height-td'))
 
       for td in table.querySelectorAll('td.st-row-height-td')
         td.parentNode.removeChild(td)
