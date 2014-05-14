@@ -8,7 +8,9 @@
   "ignore": [
     "!/lib/supertable.js",
     "!/lib/supertable.min.js",
-    "!/lib/supertable.css"
+    "!/lib/supertable.css",
+    "!/lib/modernizr.js",
+    "!/lib/modernizr.min.js"
   ],
   "dependencies": {},
   "devDependencies": {
