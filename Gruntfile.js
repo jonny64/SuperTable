@@ -310,12 +310,14 @@ module.exports = function (grunt) {
             lib: {
                 files: {
                     'lib/supertable.js': '<%= yeoman.dist %>/scripts/main.js',
+                    'lib/modernizr.js': '<%= yeoman.dist %>/scripts/vendor/modernizr.js'
                 }
             },
             libMin: {
                 files: {
                     'lib/supertable.min.js': '<%= yeoman.dist %>/scripts/main.js',
-                    'lib/supertable.css': '<%= yeoman.dist %>/styles/main.css'
+                    'lib/supertable.css': '<%= yeoman.dist %>/styles/main.css',
+                    'lib/modernizr.min.js': '<%= yeoman.dist %>/scripts/vendor/modernizr.js'
                 }
             }
         },
