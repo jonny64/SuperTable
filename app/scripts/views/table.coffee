@@ -65,7 +65,7 @@ define [
         @tableContainer.style.width = '0px'
         @tableContainer.style.height = '0px'
         @_setPanesSize()), 300)
-      $(window).resize debounceSize
+      $(window).on 'setPanesSize', debounceSize
 
     render: ->
       @log 'render'
