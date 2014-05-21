@@ -5,6 +5,8 @@ define ['backbone', 'templates/header', 'templates/empty_header'],
       'click @more-button': '_onClickMore'
       'click @next-page': '_onClickNext'
       'click @prev-page': '_onClickPrev'
+      'click @first-page': '_preventDefault'
+      'click @last-page': '_preventDefault'
 
     initialize: ->
       @listenTo @model, 'change', @render
@@ -41,18 +43,29 @@ define ['backbone', 'templates/header', 'templates/empty_header'],
       @$lastRow = @$('@last-row')
       @$totalRows = @$('@total-rows')
 
+    _preventDefault: (e) ->
+      e.preventDefault()
+      e.stopPropagation()
+      false
+
     _onClickMore: (e) ->
-      return e.preventDefault() if @$moreButton.hasClass('disabled')
+      @_preventDefault(e)
+      return if @$moreButton.hasClass('disabled')
       @_disableMore()
       @options.app.trigger 'more-button:click'
+      false
 
     _onClickNext: (e) ->
-      return e.preventDefault() if @$nextPage.hasClass('disabled')
+      @_preventDefault(e)
+      return if @$nextPage.hasClass('disabled')
       @options.app.trigger 'next-page:click'
+      false
 
     _onClickPrev: (e) ->
-      return e.preventDefault() if @$prevPage.hasClass('disabled')
+      @_preventDefault(e)
+      return if @$prevPage.hasClass('disabled')
       @options.app.trigger 'prev-page:click'
+      false
 
     _disableMore: -> @$moreButton.addClass('disabled')
     _enableMore: -> @$moreButton.removeClass('disabled')
