@@ -1,7 +1,6 @@
 define ['backbone', 'templates/header', 'templates/empty_header'],
 (Backbone, template, emptyTemplate) ->
   class FooterView extends Backbone.View
-    el: '@header'
     events:
       'click @more-button': '_onClickMore'
       'click @next-page': '_onClickNext'
