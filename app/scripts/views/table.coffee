@@ -23,7 +23,6 @@ define [
   emptyTableTemplate,
   sortTemplate ) ->
   class TableView extends Backbone.View
-    el: '@table-container'
     events:
       'click [data-href]': '_onClickDataHref'
 

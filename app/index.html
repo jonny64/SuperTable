@@ -41,12 +41,12 @@
           if (typeof require == 'function') {
             // running in development
             require(['main'], function(SuperTable){
-              SuperTable.initialize(options);
+              new SuperTable(options);
               document.getElementById('app_version').textContent = SuperTable.version;
             });
           } else {
             // running in production
-            window.SuperTable.initialize(options);
+            new window.SuperTable(options);
             document.getElementById('app_version').textContent = window.SuperTable.version;
           }
         </script>

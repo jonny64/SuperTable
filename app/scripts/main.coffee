@@ -27,4 +27,4 @@ require.config
     underscore: '../bower_components/underscore/underscore'
 
 define ['app'], (SuperTable) ->
-  new SuperTable()
+  SuperTable

@@ -8,12 +8,12 @@ define [
 ], (_, Backbone, TableModel, LayoutView, TableState, TableAPI) ->
 
   class App
-    version: '0.1.4'
+    @version: '0.1.4'
     log: (msg) -> window.console?.log?(msg)
-    initialize: (options) ->
+    constructor: (options) ->
       _.extend @, Backbone.Events
 
-      @log "app starting version #{@version}..."
+      @log "app starting version #{App.version}..."
 
       unless options.tableUrl
         @log 'url is a mandatory parameter'

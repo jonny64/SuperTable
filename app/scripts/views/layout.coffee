@@ -8,6 +8,6 @@ define [
     render: ->
       @$el.empty()
       @$el.html template()
-      (new HeaderView(app: @options.app, model: @options.table)).render()
-      @table = new TableView(app: @options.app, model: @options.table, $container: @$el)
+      (new HeaderView(el: @$('@header'), app: @options.app, model: @options.table)).render()
+      @table = new TableView(el: @$('@table-container'), app: @options.app, model: @options.table, $container: @$el)
       @table.render()
