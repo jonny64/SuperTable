@@ -44,7 +44,7 @@ define [
         rowHeight: 28
         width: 0
         height: 0
-        extraWidth: 100 # to be able to widen last column
+        extraWidth: 0 # to be able to widen last column
         scrollBarWidth: null
 
       @app = @options.app
