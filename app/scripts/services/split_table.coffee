@@ -2,7 +2,7 @@ define ['underscore'], (_) ->
   class SplitTable
     constructor: (container, tableHtml, tableDefaults, model, before) ->
       @container = container
-      containerWidth = container.clientWidth
+      containerWidth = $(container).width()
       @tableDefaults = tableDefaults
       table = @_createTable(tableHtml)
       @model = model
