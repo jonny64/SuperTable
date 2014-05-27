@@ -46,6 +46,7 @@ define [
         height: 0
         extraWidth: 100 # to be able to widen last column
         scrollBarWidth: null
+        min_height: 100
 
       @app = @options.app
       @log = @app.log
@@ -65,7 +66,7 @@ define [
         @tableContainer.style.width = '0px'
         @tableContainer.style.height = '0px'
         @_setPanesSize()), 300)
-      $(window).resize debounceSize
+      $(window).on 'resize', debounceSize
 
     render: ->
       @log 'render'
@@ -189,6 +190,7 @@ define [
         @_onScroll())
 
       @_tableRendered = true
+      @_tables = tables
       @_setPanesSize()
       @_stopSpinner()
 
@@ -213,7 +215,26 @@ define [
     _startSpinner: =>
       @$el.spin(true)
 
+    _getContainerHeight: (tables) =>
+
+      header_height = $(tables.top.right).height()
+      body_height = $(tables.bottom.right).height()
+      scroll_width = @_scrollBarWidth()
+      expanded_table_height = header_height + body_height + scroll_width
+      fit_page_height = window.innerHeight - @$el.position().top
+      fit_page_height -= @$el.css("padding-top").replace("px", "")
+      fit_page_height -= @$el.css("padding-bottom").replace("px", "");
+
+      min_height = @tableDefaults.min_height + scroll_width
+
+      return expanded_table_height if expanded_table_height < fit_page_height
+      return fit_page_height if fit_page_height > min_height
+      return expanded_table_height
+
     _setPanesSize: =>
+
+      @$el.height(@_getContainerHeight(@_tables))
+
       @containerWidth = @$el.width()
       @containerHeight = @$el.height()
 
