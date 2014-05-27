@@ -189,6 +189,7 @@ define [
         @_onScroll())
 
       @_tableRendered = true
+      @app.trigger 'container:render', tables
       @_setPanesSize()
       @_stopSpinner()
 

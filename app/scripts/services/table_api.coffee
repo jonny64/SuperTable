@@ -22,6 +22,9 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         @postPage(action: 'update_columns', order: 1, columns: state.columnsStr())
       @listenTo options.app, 'table:widths', =>
         @_saveState(data: {action: 'update_dimensions', columns: state.columnsStr() })
+      @listenTo options.app, 'container:render', (tables)=>
+        options.containerRender(tables)
+
 
       #TODO api object/service
       @pageUrl = options.pageUrl
