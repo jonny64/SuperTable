@@ -215,13 +215,16 @@ define [
     _startSpinner: =>
       @$el.spin(true)
 
+    _viewportHeight: =>
+      Math.max(document.documentElement.clientHeight, window.innerHeight || 0)
+
     _getContainerHeight: (tables) =>
 
       header_height = $(tables.top.right).height()
       body_height = $(tables.bottom.right).height()
       scroll_width = @_scrollBarWidth()
       expanded_table_height = header_height + body_height + scroll_width
-      fit_page_height = window.innerHeight - @$el.position().top
+      fit_page_height = @_viewportHeight() - @$el.position().top
       fit_page_height -= @$el.css("padding-top").replace("px", "")
       fit_page_height -= @$el.css("padding-bottom").replace("px", "");
 
