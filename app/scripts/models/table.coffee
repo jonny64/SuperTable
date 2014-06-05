@@ -4,7 +4,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       if @get('fetchType') == 'mergePage'
         resp.start = '' + @start()
         resp.cnt = '' + (@cnt() + parseInt(resp.cnt, 10))
-      resp.order = @extractOrder(resp.columns) if resp.columns
+      resp.order = @extractOrder(_.clone(resp.columns)) if resp.columns
       resp
 
     extractOrder: (columns, order={}) =>
