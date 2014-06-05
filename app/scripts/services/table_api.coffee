@@ -16,6 +16,12 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @listenTo options.app, 'prev-page:click', =>
         if !@table.firstPage()
           @getPage(@table.prevPage())
+      @listenTo options.app, 'first-page:click', =>
+        if !@table.firstPage()
+          @getPage(0)
+      @listenTo options.app, 'last-page:click', =>
+        if !@table.lastPage()
+          @getPage(@table.lastPageStart())
       @listenTo options.app, 'table:sort', =>
         @postPage(action: 'update_columns', sort: 1, columns: state.columnsStr())
       @listenTo options.app, 'table:reorder', =>
