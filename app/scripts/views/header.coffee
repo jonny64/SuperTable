@@ -5,8 +5,8 @@ define ['backbone', 'templates/header', 'templates/empty_header'],
       'click @more-button': '_onClickMore'
       'click @next-page': '_onClickNext'
       'click @prev-page': '_onClickPrev'
-      'click @first-page': '_preventDefault'
-      'click @last-page': '_preventDefault'
+      'click @first-page': '_onClickFirst'
+      'click @last-page': '_onClickLast'
 
     initialize: ->
       @listenTo @model, 'change', @render
@@ -39,6 +39,8 @@ define ['backbone', 'templates/header', 'templates/empty_header'],
       @$moreButton = @$('@more-button')
       @$nextPage = @$('@next-page')
       @$prevPage = @$('@prev-page')
+      @$firstPage = @$('@first-page')
+      @$lastPage = @$('@last-page')
       @$firstRow = @$('@first-row')
       @$lastRow = @$('@last-row')
       @$totalRows = @$('@total-rows')
@@ -67,9 +69,33 @@ define ['backbone', 'templates/header', 'templates/empty_header'],
       @options.app.trigger 'prev-page:click'
       false
 
+    _onClickLast: (e) ->
+      @_preventDefault(e)
+      return if @$lastPage.hasClass('disabled')
+      @options.app.trigger 'last-page:click'
+      false
+
+    _onClickFirst: (e) ->
+      @_preventDefault(e)
+      return if @$firstPage.hasClass('disabled')
+      @options.app.trigger 'first-page:click'
+      false
+
     _disableMore: -> @$moreButton.addClass('disabled')
     _enableMore: -> @$moreButton.removeClass('disabled')
-    disableNext: -> @$nextPage.addClass('disabled')
-    enableNext: -> @$nextPage.removeClass('disabled')
-    disablePrev: -> @$prevPage.addClass('disabled')
-    enablePrev: -> @$prevPage.removeClass('disabled')
+
+    disableNext: =>
+      @$nextPage.addClass('disabled')
+      @$lastPage.addClass('disabled')
+
+    enableNext: =>
+      @$nextPage.removeClass('disabled')
+      @$lastPage.removeClass('disabled')
+
+    disablePrev: =>
+      @$prevPage.addClass('disabled')
+      @$firstPage.addClass('disabled')
+
+    enablePrev: =>
+      @$prevPage.removeClass('disabled')
+      @$firstPage.removeClass('disabled')
