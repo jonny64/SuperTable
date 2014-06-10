@@ -6,14 +6,21 @@ define ['underscore'], (_) ->
       @tableDefaults = tableDefaults
       table = @_createTable(tableHtml)
       @model = model
+
+      if (model.get('calculated_dimensions')?.headers)
+          table.style.tableLayout = 'fixed'
+      else
+          table.style.width = '100%'
+          table.style.tableLayout = 'auto'
+
       thead = table.querySelector('thead')
       before(thead) if thead
       #unless @model.get('calculated_dimensions')?.headers
       @_insertWidthRulers(table)
       [widths, headHeights, bodyHeights] = @_countDims(table)
       totWidth = _(widths).reduce(((memo, num) -> memo + num), 0)
-      if !@model.get('calculated_dimensions')?.headers and containerWidth > totWidth
-        widths = @_autoExpandWidths(widths, (containerWidth / totWidth))
+      #if !model.get('calculated_dimensions')?.headers and containerWidth > totWidth
+      #  widths = @_autoExpandWidths(widths, (containerWidth / totWidth))
 
       @top = @_splitTable(table.querySelector('thead'),
                           widths, headHeights,
@@ -33,7 +40,14 @@ define ['underscore'], (_) ->
       div.style.position = 'fixed'
       div.style.top = '-10000px'
       div.style.left = '-10000px'
-      div.style.width = $(@container).width() + 'px'
+      if !@model.get('calculated_dimensions')?.headers
+        table_width = $(@container).width()
+      else
+        widths = _(@model.get('columns')).map((column) -> column.width)
+        total_width = _(widths).reduce(((memo, num) -> memo + num), 0)
+        table_width = total_width
+
+      div.style.width = table_width + 'px'
       div.style.height = '100px'
       div.style.overflow = 'hidden'
       div.className = 'st-table-pre-render'
@@ -138,7 +152,6 @@ define ['underscore'], (_) ->
 
     _countDims: (table) =>
       div = @_preRender()
-      table.style.width = '100%'
       div.appendChild table
       widths = []
       for cell in table.querySelector('tr.st-table-widths-row').querySelectorAll('td')
