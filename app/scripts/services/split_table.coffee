@@ -33,7 +33,7 @@ define ['underscore'], (_) ->
       div.style.position = 'fixed'
       div.style.top = '-10000px'
       div.style.left = '-10000px'
-      div.style.width = '50000px'
+      div.style.width = $(@container).width() + 'px'
       div.style.height = '100px'
       div.style.overflow = 'hidden'
       div.className = 'st-table-pre-render'
@@ -138,7 +138,7 @@ define ['underscore'], (_) ->
 
     _countDims: (table) =>
       div = @_preRender()
-      #table.style.tableLayout = 'fixed'
+      table.style.width = '100%'
       div.appendChild table
       widths = []
       for cell in table.querySelector('tr.st-table-widths-row').querySelectorAll('td')
