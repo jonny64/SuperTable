@@ -61,4 +61,4 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         data: options.data
 
     _apiUrl: (index) ->
-      @table.url.replace('#{page}', index)
+      @table.url.replace('#{page}', index) + '&salt=' + Math.random()
