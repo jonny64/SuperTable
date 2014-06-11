@@ -7,11 +7,9 @@ define ['underscore'], (_) ->
       table = @_createTable(tableHtml)
       @model = model
 
-      if (model.get('calculated_dimensions')?.headers)
-          table.style.tableLayout = 'fixed'
-      else
-          table.style.width = '100%'
-          table.style.tableLayout = 'auto'
+      table.style.tableLayout = 'fixed'
+      if (!model.get('calculated_dimensions')?.headers)
+        table.style.width = '100%'
 
       thead = table.querySelector('thead')
       before(thead) if thead
