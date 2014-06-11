@@ -273,6 +273,8 @@ define [
       @tableRightViewport.style.left = "#{@leftWidth}px"
       @tableRightViewport.style.width = "#{rightPaneWidth}px"
       @tableRightViewport.style.height = "#{paneHeight}px"
+      if !@model.get('fix_columns')
+        @tableRightViewport.style.overflowX = "auto"
 
     _scrollBarWidth: =>
       return @tableDefaults.scrollBarWidth if @tableDefaults.scrollBarWidth != null
