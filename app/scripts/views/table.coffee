@@ -236,9 +236,9 @@ define [
 
     _setPanesSize: =>
 
-      @$el.height(@_getContainerHeight(@_tables))
-
       @containerWidth = @$el.width()
+
+      @$el.height(@_getContainerHeight(@_tables))
       @containerHeight = @$el.height()
 
       @log 'set panes size'
