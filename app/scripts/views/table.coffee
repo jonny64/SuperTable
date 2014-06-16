@@ -65,9 +65,11 @@ define [
         return unless @tableContainer
         @tableContainer.style.width = '0px'
         @tableContainer.style.height = '0px'
-        @$el.width(0);
-        @$el.height(0);
+        @$el.width(0)
+        @$el.height(0)
+        document.body.style.overflow = 'auto'
         @_setPanesSize()), 300)
+      $(window).on 'resize', (=> document.body.style.overflow = 'hidden')
       $(window).on 'resize', debounceSize
 
     render: ->
