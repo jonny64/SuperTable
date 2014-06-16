@@ -65,6 +65,8 @@ define [
         return unless @tableContainer
         @tableContainer.style.width = '0px'
         @tableContainer.style.height = '0px'
+        @$el.width(0);
+        @$el.height(0);
         @_setPanesSize()), 300)
       $(window).on 'resize', debounceSize
 
