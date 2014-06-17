@@ -78,10 +78,13 @@ define [
       @_renderContainer(html) if html
       @
 
-    insertSortBlocks: (container) ->
+    insertSortBlocks: (container, is_fix_columns) ->
       tds = container.querySelectorAll('td.sortable, th.sortable')
       _(tds).each (td) ->
-        td.style.whiteSpace = 'nowrap'
+        if is_fix_columns
+          td.style.whiteSpace = 'nowrap'
+        else
+          $(td).append('&nbsp;')
         $(td).append(sortTemplate())
 
     onShow: ->
