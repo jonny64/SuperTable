@@ -81,6 +81,11 @@ define [
         @$el.html mainTableTemplate()
         @_assignRegions()
       @_renderContainer(html) if html
+
+      visited_row = this.$el.find('tr.row-state-visited');
+      if visited_row.length
+        scroll_top = visited_row.position().top - $(this.tableRightViewport).height() / 2
+        this.tableRightViewport.scrollTop = this.tableLeftViewport.scrollTop = scroll_top
       @
 
     insertSortBlocks: (container, is_fix_columns) ->
