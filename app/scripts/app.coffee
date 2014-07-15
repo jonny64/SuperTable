@@ -36,6 +36,7 @@ define [
         table: table
         tableState: tableState
         pageUrl: options.pageUrl
+        containerRender: options.containerRender || () ->
 
 
       tableAPI.getPage()
