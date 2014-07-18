@@ -23,11 +23,11 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         if !@table.lastPage()
           @getPage(@table.lastPageStart())
       @listenTo options.app, 'table:sort', =>
-        @postPage(action: 'update_columns', sort: 1, columns: state.columnsStr())
+        @postPage(action: 'update_columns', sort: 1, columns: state.columnsStr(), salt: Math.random())
       @listenTo options.app, 'table:reorder', =>
-        @postPage(action: 'update_columns', order: 1, columns: state.columnsStr())
+        @postPage(action: 'update_columns', order: 1, columns: state.columnsStr(), salt: Math.random())
       @listenTo options.app, 'table:widths', =>
-        @_saveState(data: {action: 'update_dimensions', columns: state.columnsStr() })
+        @_saveState(data: {action: 'update_dimensions', columns: state.columnsStr(), salt: Math.random() })
       @listenTo options.app, 'container:render', (tables)=>
         options.containerRender(tables)
 
