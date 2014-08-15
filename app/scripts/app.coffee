@@ -39,6 +39,7 @@ define [
         containerRender: options.containerRender || () ->
 
       @.trigger 'page:loaded'
+      @.trigger 'container:render'
 
     elWidth: (obj) ->
       Math.max obj.clientWidth, obj.offsetWidth, obj.scrollWidth

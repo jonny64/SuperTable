@@ -28,8 +28,8 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         @postPage(action: 'update_columns', order: 1, columns: state.columnsStr(), salt: Math.random())
       @listenTo options.app, 'table:widths', =>
         @_saveState(data: {action: 'update_dimensions', columns: state.columnsStr(), salt: Math.random() })
-      @listenTo options.app, 'container:render', (tables)=>
-        options.containerRender(tables)
+      @listenTo options.app, 'container:render', =>
+        options.containerRender()
 
 
       #TODO api object/service

@@ -195,7 +195,7 @@ define [
 
       @_tableRendered = true
       @_tables = tables
-      @app.trigger 'container:render', tables
+      @app.trigger 'container:render'
       @_setPanesSize()
       @_stopSpinner()
 
