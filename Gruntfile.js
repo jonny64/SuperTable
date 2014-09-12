@@ -203,7 +203,8 @@ module.exports = function (grunt) {
             dist: {
                 // Options: https://github.com/jrburke/r.js/blob/master/build/example.build.js
                 options: {
-                    almond: true,
+//                    almond: true,
+                    almond: false,
                     replaceRequireScript: [{
                         files: ['dist/index.html'],
                         module: 'main',
@@ -218,15 +219,18 @@ module.exports = function (grunt) {
                         'jquery.spin': '../../app/bower_components/spinjs/jquery.spin',
                         'jquery-mousewheel': '../../app/bower_components/jquery-mousewheel/jquery.mousewheel',
                         'spin': '../../app/bower_components/spinjs/spin',
-                        'jquery': '../../app/bower_components/jquery/jquery',
+//                        'jquery': '../../app/bower_components/jquery/jquery',
+                        'jquery': '../../jquery-fake',
                         'underscore': '../../app/bower_components/underscore/underscore',
                         'backbone': '../../app/bower_components/backbone/backbone'
                     },
                     preserveLicenseComments: false,
                     useStrict: true,
                     wrap: {
-                        start: "(function(root, factory){if(typeof define === 'function' && define.amd){define([], factory);}else{root.SuperTable = factory();}}(this, function() {",
-                        end: "return require('main');}));"
+				start: "(function() {",
+				end  : "define(['main'], function(SuperTable) {return SuperTable;});}).call(this);"
+//                        start: "(function(root, factory){if(typeof define === 'function' && define.amd){define([], factory);}else{root.SuperTable = factory();}}(this, function() {",
+//                        end: "return require('main');}));"
                     }
                 }
             }

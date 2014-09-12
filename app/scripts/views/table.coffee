@@ -46,7 +46,7 @@ define [
         height: 0
         extraWidth: 0 # to be able to widen last column
         scrollBarWidth: null
-        min_height: 100
+        min_height: 200
 
       @app = @options.app
       @log = @app.log

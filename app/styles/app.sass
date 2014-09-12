@@ -49,10 +49,17 @@ table.st-table-pre-render
   table-layout: auto
   border-collapse: collapse
 
+.st-table-pre-render
+  padding: 10px
+
 .st-table-pre-render table, tr, td, th
   border-spacing: 0
   margin: 0
   padding: 0
+
+st-table-pre-render tr:last-child th
+  border-bottom: 4px solid
+  margin-top: -4px
 
 .st-table-container td, th
   overflow: hidden

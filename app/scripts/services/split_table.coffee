@@ -153,6 +153,14 @@ define ['underscore'], (_) ->
     _countDims: (table) =>
       div = @_preRender()
       div.appendChild table
+
+      fit_page_height = document.documentElement.clientHeight - $(this.container).position().top
+      table_height = div.scrollHeight + this.tableDefaults.scrollBarWidth
+      if fit_page_height > 0 && fit_page_height < table_height && fit_page_height < this.tableDefaults.min_height + this.tableDefaults.scrollBarWidth
+        eludia_table_container = $(this.container.parentElement.parentElement)
+        eludia_table_container.width (eludia_table_container.width() - this.tableDefaults.scrollBarWidth)
+        div.style.width = (div.style.width.replace("px", "") - this.tableDefaults.scrollBarWidth) + 'px'
+
       widths = []
       for cell in table.querySelector('tr.st-table-widths-row').querySelectorAll('td')
         widths.push @_elWidth(cell) if cell.className not in ['freezbar-cell', 'st-row-height-td']
