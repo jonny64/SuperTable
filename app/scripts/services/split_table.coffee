@@ -14,7 +14,7 @@ define ['underscore'], (_) ->
           table.style.tableLayout = 'auto'
 
       thead = table.querySelector('thead')
-      before(thead) if thead
+      before(thead, @model.get('fix_columns')) if thead
       #unless @model.get('calculated_dimensions')?.headers
       @_insertWidthRulers(table)
       [widths, headHeights, bodyHeights] = @_countDims(table)
