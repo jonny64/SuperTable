@@ -28,6 +28,8 @@ define [
 
     _onClickDataHref: (e) ->
       e.stopPropagation()
+      if e.target.tagName != 'TD'
+        return
       el = e.currentTarget
       data = el.getAttribute 'data-href'
       if parseData = data.match /^javascript:(.*)/m
