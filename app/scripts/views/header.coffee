@@ -85,17 +85,26 @@ define ['backbone', 'templates/header', 'templates/empty_header'],
     _enableMore: -> @$moreButton.removeClass('disabled')
 
     disableNext: =>
-      @$nextPage.addClass('disabled')
-      @$lastPage.addClass('disabled')
+      @$nextPage.hide()
+      @$lastPage.hide()
+      # @$nextPage.addClass('disabled')
+      # @$lastPage.addClass('disabled')
 
     enableNext: =>
-      @$nextPage.removeClass('disabled')
-      @$lastPage.removeClass('disabled')
+      @$nextPage.show()
+      @$lastPage.show()
+      # @$nextPage.removeClass('disabled')
+      # @$lastPage.removeClass('disabled')
 
     disablePrev: =>
-      @$prevPage.addClass('disabled')
-      @$firstPage.addClass('disabled')
+      @$prevPage.hide()
+      @$firstPage.hide()
+
+      # @$prevPage.addClass('disabled')
+      # @$firstPage.addClass('disabled')
 
     enablePrev: =>
-      @$prevPage.removeClass('disabled')
-      @$firstPage.removeClass('disabled')
+      @$prevPage.show()
+      @$firstPage.show()
+      # @$prevPage.removeClass('disabled')
+      # @$firstPage.removeClass('disabled')
