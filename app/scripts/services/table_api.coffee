@@ -29,7 +29,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @listenTo options.app, 'table:widths', =>
         @_saveState(data: {action: 'update_dimensions', columns: state.columnsStr(), salt: Math.random() })
       @listenTo options.app, 'container:render', =>
-        options.containerRender()
+        options.containerRender(@table)
 
 
       #TODO api object/service

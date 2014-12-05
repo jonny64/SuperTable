@@ -28,7 +28,7 @@ define [
 
     _onClickDataHref: (e) ->
       e.stopPropagation()
-      if e.target.tagName != 'TD'
+      if e.target.tagName == 'INPUT' || e.target.tagName == 'SELECT'
         return
       el = e.currentTarget
       data = el.getAttribute 'data-href'
@@ -96,7 +96,7 @@ define [
         if is_fix_columns
           td.style.whiteSpace = 'nowrap'
         else
-          $(td).append('&nbsp;')
+          $(td).append(' ')
         $(td).append(sortTemplate())
 
     onShow: ->
