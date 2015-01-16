@@ -20,13 +20,19 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @extractOrder(columns, order)
 
     lastPage: =>
-      @total() - @cnt() <= @start()
+      @start() >= @total() - @portion()
 
     lastPageStart: =>
       @total() - @total() % @portion()
 
     firstPage: =>
       !@start()
+
+    notFirstPage: =>
+      @start() > @portion()
+
+    notLastPage: =>
+      @start() + @cnt() < @total() - @portion() + 1
 
     nextPage: =>
       @start() + @portion()

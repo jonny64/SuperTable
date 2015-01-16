@@ -32,8 +32,10 @@ define ['backbone', 'templates/header', 'templates/empty_header'],
       @$lastRow.html(@model.start() + @model.cnt() || '?')
       @$totalRows.html(@model.total() || '?')
 
-      if !@model.firstPage() then @enablePrev() else @disablePrev()
-      if !@model.lastPage() then @enableNext() else @disableNext()
+      if !@model.firstPage()    then @enablePrev()  else @disablePrev()
+      if @model.notFirstPage() then @enableFirst() else @disableFirst()
+      if !@model.lastPage()     then @enableNext()  else @disableNext()
+      if @model.notLastPage()  then @enableLast()  else @disableLast()
 
     _assignUi: ->
       @$moreButton = @$('@more-button')
@@ -86,18 +88,24 @@ define ['backbone', 'templates/header', 'templates/empty_header'],
 
     disableNext: =>
       @$nextPage.hide()
-      @$lastPage.hide()
       # @$nextPage.addClass('disabled')
       # @$lastPage.addClass('disabled')
 
+    disableLast: =>
+      @$lastPage.hide()
+
     enableNext: =>
       @$nextPage.show()
-      @$lastPage.show()
       # @$nextPage.removeClass('disabled')
       # @$lastPage.removeClass('disabled')
 
+    enableLast: =>
+      @$lastPage.show()
+
     disablePrev: =>
       @$prevPage.hide()
+
+    disableFirst: =>
       @$firstPage.hide()
 
       # @$prevPage.addClass('disabled')
@@ -105,6 +113,8 @@ define ['backbone', 'templates/header', 'templates/empty_header'],
 
     enablePrev: =>
       @$prevPage.show()
-      @$firstPage.show()
       # @$prevPage.removeClass('disabled')
       # @$firstPage.removeClass('disabled')
+
+    enableFirst: =>
+      @$firstPage.show()
