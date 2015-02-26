@@ -1,6 +1,9 @@
 define ['underscore', 'jquery'], (_, $) ->
   class ColumnReordering
     constructor: (options, mainViewport) ->
+      if options.model.get('disable_reorder_columns')
+        return
+
       @dragConfig =
         threshold: 10
         scrollEdge: 50
@@ -95,6 +98,8 @@ define ['underscore', 'jquery'], (_, $) ->
                 dragEvent.boundaries.right - dragEvent.elWidth])
 
     buildHierarchy: =>
+      if !@el
+        return
       table = @el.querySelector('table')
       tds = table.querySelectorAll('th, td')
       # count positions/widths
