@@ -15,11 +15,20 @@ define ['underscore', 'jquery'], (_, $) ->
       @mainViewport = mainViewport
 
       @$el.on 'mousedown', 'th', @_onMouseDown
+      @$el.on 'touchstart', 'th', @_onMouseDown
       $(document).on 'mousemove', @_onMouseMove
+      $(document).on 'touchmove', @_onMouseMove
       $(document).on 'mouseup', @_onMouseUp
+      $(document).on 'touchend', @_onMouseUp
+      $(document).on 'touchcancel', @_onMouseUp
 
     _onMouseDown: (e) =>
       return if @dragEvent
+
+      if e.type == 'touchstart'
+        e.clientX = e.originalEvent.changedTouches[0].clientX
+        e.clientY = e.originalEvent.changedTouches[0].clientY
+
       @initState =
         x: e.clientX
         y: e.clientY
@@ -28,6 +37,11 @@ define ['underscore', 'jquery'], (_, $) ->
 
     _onMouseMove: (e) =>
       return unless @initState
+
+      if e.type == 'touchmove'
+        e.clientX = e.originalEvent.changedTouches[0].clientX
+        e.clientY = e.originalEvent.changedTouches[0].clientY
+
       if @dragEvent
         @polling = false
         clearTimeout(@dragPoll) if @dragPoll

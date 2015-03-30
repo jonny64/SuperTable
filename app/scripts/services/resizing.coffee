@@ -8,13 +8,21 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
       @mainHeight = @$main.height()
       @statOverlay = options.statOverlay
       @$main.on 'mousedown', '.st-resize-block', @_onMouseDown
+      @$main.on 'touchstart', '.st-resize-block', @_onMouseDown
       @$main.on 'mousemove', @_onMouseMove
+      @$main.on 'touchmove', @_onMouseMove
       @$main.on 'mouseup', @_onMouseUp
+      @$main.on 'touchend', @_onMouseUp
+      @$main.on 'touchcancel', @_onMouseUp
       @dragging = false
 
     rebind: ({@statOverlay}) =>
 
     _onMouseDown: (e) =>
+      if e.type == 'touchstart'
+        e.clientX = e.originalEvent.changedTouches[0].clientX
+        e.clientY = e.originalEvent.changedTouches[0].clientY
+
       @$current = $(e.currentTarget)
       @$current.addClass('dragging')
       @resizeBar = @_resizeBar(e.currentTarget)
@@ -28,11 +36,19 @@ define ['underscore', 'jquery', 'templates/_resize_bar'], (_, $, template) ->
 
     _onMouseMove: (e) =>
       return unless @dragging
+
+      if e.type == 'touchmove'
+        e.clientX = e.originalEvent.changedTouches[0].clientX
+        e.clientY = e.originalEvent.changedTouches[0].clientY
+
       newLeft = @resizeBar.initLeft - @origWidth + @_newWidth(e)
       @resizeBar.div.style.left = "#{newLeft}px"
 
     _onMouseUp: (e) =>
       return unless @dragging
+      if e.type == 'touchend' || e.type == 'touchcancel'
+        e.clientX = e.originalEvent.changedTouches[0].clientX
+        e.clientY = e.originalEvent.changedTouches[0].clientY
       newWidth = @_newWidth(e)
       @app.log "prev width: #{@origWidth} | new width: #{newWidth}"
       @_resizeAction(newWidth, @$current[0])

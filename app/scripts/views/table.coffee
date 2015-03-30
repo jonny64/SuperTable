@@ -28,7 +28,10 @@ define [
 
     _onClickDataHref: (e) ->
       e.stopPropagation()
-      if e.target.tagName == 'INPUT' || e.target.tagName == 'SELECT'
+      selection = window.getSelection()
+      if selection && selection.getRangeAt(0) && !selection.getRangeAt(0).collapsed
+          return
+      if e.ctrlKey || e.target.tagName == 'TR' || e.target.tagName == 'INPUT' || e.target.tagName == 'SELECT'
         return
       el = e.currentTarget
       data = el.getAttribute 'data-href'
@@ -197,6 +200,11 @@ define [
       @tableLeftViewport.appendChild tables.bottom.left
       @tableRightViewport.appendChild tables.bottom.right
 
+      _(@tableRightViewport.querySelectorAll('td, th')).each((td) =>
+        if !td.getAttribute ('title')
+          td.setAttribute('title', td.innerText)
+      )
+
       @tableRightViewport.onscroll = @_onScroll
       $(@tableLeftViewport).off('mousewheel')
       $(@tableLeftViewport).on('mousewheel', (e) =>
@@ -239,6 +247,10 @@ define [
       body_height = $(tables.bottom.right).height()
       scroll_width = @_scrollBarWidth()
       expanded_table_height = header_height + body_height + scroll_width
+
+      eludia_table_container_cnt = document.querySelectorAll('div.eludia-table-container').length
+      return expanded_table_height if eludia_table_container_cnt > 1
+
       fit_page_height = @_viewportHeight() - @$el.position().top
       fit_page_height -= @$el.css("padding-top").replace("px", "")
       fit_page_height -= @$el.css("padding-bottom").replace("px", "");

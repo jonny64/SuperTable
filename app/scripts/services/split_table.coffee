@@ -41,7 +41,7 @@ define ['underscore'], (_) ->
       div.style.top = '-10000px'
       div.style.left = '-10000px'
       if !@model.get('calculated_dimensions')?.headers
-        table_width = $(@container).width()
+        table_width = $(@container).width() - @tableDefaults.scrollBarWidth
       else
         widths = _(@model.get('columns')).map((column) -> column.width)
         total_width = _(widths).reduce(((memo, num) -> memo + num), 0)
