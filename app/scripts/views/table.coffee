@@ -29,7 +29,7 @@ define [
     _onClickDataHref: (e) ->
       e.stopPropagation()
       selection = window.getSelection()
-      if selection && selection.getRangeAt(0) && !selection.getRangeAt(0).collapsed
+      if selection && selection.rangeCount > 0 && selection.getRangeAt(0) && !selection.getRangeAt(0).collapsed
           return
       if e.ctrlKey || e.target.tagName == 'TR' || e.target.tagName == 'INPUT' || e.target.tagName == 'SELECT'
         return
