@@ -22,6 +22,8 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @listenTo options.app, 'last-page:click', =>
         if !@table.lastPage()
           @getPage(@table.lastPageStart())
+      @listenTo options.app, 'reload-page:click', =>
+        @getPage(@table.start())
       @listenTo options.app, 'table:sort', =>
         @postPage(action: 'update_columns', sort: 1, columns: state.columnsStr(), salt: Math.random())
       @listenTo options.app, 'table:reorder', =>

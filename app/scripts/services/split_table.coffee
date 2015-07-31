@@ -2,6 +2,7 @@ define ['underscore'], (_) ->
   class SplitTable
     constructor: (container, tableHtml, tableDefaults, model, before) ->
       @container = container
+      $(container).css('padding', ((tableDefaults.scrollBarWidth + 3) / 2) + 'px')
       containerWidth = $(container).width()
       @tableDefaults = tableDefaults
       table = @_createTable(tableHtml)
