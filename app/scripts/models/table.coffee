@@ -23,7 +23,7 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @start() >= @total() - @portion()
 
     lastPageStart: =>
-      @total() - @total() % @portion()
+      @total() - (@total() % @portion() || this.portion())
 
     firstPage: =>
       !@start()

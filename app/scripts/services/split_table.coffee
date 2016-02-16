@@ -19,7 +19,7 @@ define ['underscore'], (_) ->
       #unless @model.get('calculated_dimensions')?.headers
       @_insertWidthRulers(table)
       [widths, headHeights, bodyHeights] = @_countDims(table)
-      totWidth = _(widths).reduce(((memo, num) -> memo + num), 0)
+      totWidth = _(widths).reduce(((memo, num) -> memo + (parseInt(num) || 0)), 0)
       #if !model.get('calculated_dimensions')?.headers and containerWidth > totWidth
       #  widths = @_autoExpandWidths(widths, (containerWidth / totWidth))
 
@@ -45,7 +45,7 @@ define ['underscore'], (_) ->
         table_width = $(@container).width() - @tableDefaults.scrollBarWidth
       else
         widths = _(@model.get('columns')).map((column) -> column.width)
-        total_width = _(widths).reduce(((memo, num) -> memo + num), 0)
+        total_width = _(widths).reduce(((memo, num) -> memo + (parseInt(num) || 0)), 0)
         table_width = total_width
 
       div.style.width = table_width + 'px'
