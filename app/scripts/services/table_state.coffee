@@ -1,3 +1,4 @@
+
 define ['underscore', 'backbone'], (_, Backbone) ->
   class TableState
     constructor: ({@app, @el, @table}) ->
@@ -42,10 +43,10 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         else if td.querySelector('div.st-sort-block span[data-order-dir="desc"]').className.match (/\bactive\b/)
           sort.desc = '1'
       td_width = td.style.width.replace(/px/, "")
-      (td_width - td.offsetWidth > 2 || td.offsetWidth - d > 2) && (td_width = td.offsetWidth)
+      (td_width - td.offsetWidth > 2 || td.offsetWidth - td_width > 2) && (td_width = td.offsetWidth)
 
       _.extend {
         id: td.id,
         width: td_width,
         height: td.offsetHeight
-        }, sort
+      }, sort

@@ -142,7 +142,10 @@ define ['underscore'], (_) ->
 
       #insert height rule
       for row in table.querySelectorAll('tr')
-        tdHeight = row.insertCell(0)
+        if row.parentNode.tagName == 'THEAD'
+          tdHeight = row.insertBefore document.createElement('th'), row.firstChild
+        else
+          tdHeight = row.insertCell(0)
         tdHeight.className = 'st-row-height-td'
 
     _elWidth: (obj) ->
@@ -166,10 +169,10 @@ define ['underscore'], (_) ->
       for cell in table.querySelector('tr.st-table-widths-row').querySelectorAll('td')
         widths.push @_elWidth(cell) if cell.className not in ['freezbar-cell', 'st-row-height-td']
 
-      headHeights = (@_elHeight(td) for td in table.querySelector('thead').querySelectorAll('td.st-row-height-td'))
+      headHeights = (@_elHeight(td) for td in table.querySelector('thead').querySelectorAll('td.st-row-height-td, th.st-row-height-td'))
       bodyHeights = (@_elHeight(td) for td in table.querySelector('tbody').querySelectorAll('td.st-row-height-td'))
 
-      for td in table.querySelectorAll('td.st-row-height-td')
+      for td in table.querySelectorAll('td.st-row-height-td, th.st-row-height-td')
         td.parentNode.removeChild(td)
 
       #document.getElementsByTagName('body').item(0).removeChild(div)
