@@ -28,6 +28,8 @@ define [
 
     _onClickDataHref: (e) ->
       e.stopPropagation()
+      if e.target.tagName == 'INPUT' || e.target.tagName == 'SELECT'
+        return
       el = e.currentTarget
       data = el.getAttribute 'data-href'
       if parseData = data.match /^javascript:(.*)/m
@@ -46,7 +48,7 @@ define [
         height: 0
         extraWidth: 0 # to be able to widen last column
         scrollBarWidth: null
-        min_height: 100
+        min_height: 200
 
       @app = @options.app
       @log = @app.log
@@ -65,7 +67,11 @@ define [
         return unless @tableContainer
         @tableContainer.style.width = '0px'
         @tableContainer.style.height = '0px'
+        @$el.width(0)
+        @$el.height(0)
+        document.body.style.overflow = 'auto'
         @_setPanesSize()), 300)
+      $(window).on 'resize', (=> document.body.style.overflow = 'hidden')
       $(window).on 'resize', debounceSize
 
     render: ->
@@ -77,12 +83,20 @@ define [
         @$el.html mainTableTemplate()
         @_assignRegions()
       @_renderContainer(html) if html
+
+      visited_row = this.$el.find('tr.row-state-visited');
+      if visited_row.length
+        scroll_top = visited_row.position().top - $(this.tableRightViewport).height() / 2
+        this.tableRightViewport.scrollTop = this.tableLeftViewport.scrollTop = scroll_top
       @
 
-    insertSortBlocks: (container) ->
+    insertSortBlocks: (container, is_fix_columns) ->
       tds = container.querySelectorAll('td.sortable, th.sortable')
       _(tds).each (td) ->
-        td.style.whiteSpace = 'nowrap'
+        if is_fix_columns
+          td.style.whiteSpace = 'nowrap'
+        else
+          $(td).append(' ')
         $(td).append(sortTemplate())
 
     onShow: ->
@@ -191,6 +205,7 @@ define [
 
       @_tableRendered = true
       @_tables = tables
+      @app.trigger 'container:render'
       @_setPanesSize()
       @_stopSpinner()
 
@@ -236,9 +251,9 @@ define [
 
     _setPanesSize: =>
 
-      @$el.height(@_getContainerHeight(@_tables))
-
       @containerWidth = @$el.width()
+
+      @$el.height(@_getContainerHeight(@_tables))
       @containerHeight = @$el.height()
 
       @log 'set panes size'
@@ -273,6 +288,8 @@ define [
       @tableRightViewport.style.left = "#{@leftWidth}px"
       @tableRightViewport.style.width = "#{rightPaneWidth}px"
       @tableRightViewport.style.height = "#{paneHeight}px"
+      if !@model.get('fix_columns')
+        @tableRightViewport.style.overflowX = "auto"
 
     _scrollBarWidth: =>
       return @tableDefaults.scrollBarWidth if @tableDefaults.scrollBarWidth != null

@@ -21,7 +21,7 @@ define [
 
       el = options.el || 'body'
 
-      table = new TableModel({}, {url: options.tableUrl})
+      table = new TableModel(options.initial_data || {}, {url: options.tableUrl})
       layoutView = new LayoutView(app: @, el: el, table: table)
 
       layoutView.render()
@@ -36,9 +36,10 @@ define [
         table: table
         tableState: tableState
         pageUrl: options.pageUrl
+        containerRender: options.containerRender || () ->
 
-
-      tableAPI.getPage()
+      @.trigger 'page:loaded'
+      @.trigger 'container:render'
 
     elWidth: (obj) ->
       Math.max obj.clientWidth, obj.offsetWidth, obj.scrollWidth

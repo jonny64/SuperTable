@@ -6,14 +6,21 @@ define ['underscore'], (_) ->
       @tableDefaults = tableDefaults
       table = @_createTable(tableHtml)
       @model = model
+
+      if (model.get('calculated_dimensions')?.headers)
+          table.style.tableLayout = 'fixed'
+      else
+          table.style.width = '100%'
+          table.style.tableLayout = 'auto'
+
       thead = table.querySelector('thead')
-      before(thead) if thead
+      before(thead, @model.get('fix_columns')) if thead
       #unless @model.get('calculated_dimensions')?.headers
       @_insertWidthRulers(table)
       [widths, headHeights, bodyHeights] = @_countDims(table)
       totWidth = _(widths).reduce(((memo, num) -> memo + num), 0)
-      if !@model.get('calculated_dimensions')?.headers and containerWidth > totWidth
-        widths = @_autoExpandWidths(widths, (containerWidth / totWidth))
+      #if !model.get('calculated_dimensions')?.headers and containerWidth > totWidth
+      #  widths = @_autoExpandWidths(widths, (containerWidth / totWidth))
 
       @top = @_splitTable(table.querySelector('thead'),
                           widths, headHeights,
@@ -33,7 +40,14 @@ define ['underscore'], (_) ->
       div.style.position = 'fixed'
       div.style.top = '-10000px'
       div.style.left = '-10000px'
-      div.style.width = '50000px'
+      if !@model.get('calculated_dimensions')?.headers
+        table_width = $(@container).width()
+      else
+        widths = _(@model.get('columns')).map((column) -> column.width)
+        total_width = _(widths).reduce(((memo, num) -> memo + num), 0)
+        table_width = total_width
+
+      div.style.width = table_width + 'px'
       div.style.height = '100px'
       div.style.overflow = 'hidden'
       div.className = 'st-table-pre-render'
@@ -138,8 +152,15 @@ define ['underscore'], (_) ->
 
     _countDims: (table) =>
       div = @_preRender()
-      #table.style.tableLayout = 'fixed'
       div.appendChild table
+
+      fit_page_height = document.documentElement.clientHeight - $(this.container).position().top
+      table_height = div.scrollHeight + this.tableDefaults.scrollBarWidth
+      if fit_page_height > 0 && fit_page_height < table_height && fit_page_height < this.tableDefaults.min_height + this.tableDefaults.scrollBarWidth
+        eludia_table_container = $(this.container.parentElement.parentElement)
+        eludia_table_container.width (eludia_table_container.width() - this.tableDefaults.scrollBarWidth)
+        div.style.width = (div.style.width.replace("px", "") - this.tableDefaults.scrollBarWidth) + 'px'
+
       widths = []
       for cell in table.querySelector('tr.st-table-widths-row').querySelectorAll('td')
         widths.push @_elWidth(cell) if cell.className not in ['freezbar-cell', 'st-row-height-td']

@@ -37,9 +37,9 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       sort = {}
       if td.className.match(/\bsortable\b/)
         sort.sort = '1'
-        if td.querySelector('div.st-sort-block span[data-order-dir="asc"]').className == 'active'
+        if td.querySelector('div.st-sort-block span[data-order-dir="asc"]').className.match (/\bactive\b/)
           sort.asc = '1'
-        else if td.querySelector('div.st-sort-block span[data-order-dir="desc"]').className == 'active'
+        else if td.querySelector('div.st-sort-block span[data-order-dir="desc"]').className.match (/\bactive\b/)
           sort.desc = '1'
 
       _.extend {

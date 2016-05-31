@@ -16,12 +16,21 @@ define ['underscore', 'backbone'], (_, Backbone) ->
       @listenTo options.app, 'prev-page:click', =>
         if !@table.firstPage()
           @getPage(@table.prevPage())
+      @listenTo options.app, 'first-page:click', =>
+        if !@table.firstPage()
+          @getPage(@table.firstPage())
+      @listenTo options.app, 'last-page:click', =>
+        if !@table.lastPage()
+          @getPage(@table.lastPageStart())
       @listenTo options.app, 'table:sort', =>
-        @postPage(action: 'update_columns', sort: 1, columns: state.columnsStr())
+        @postPage(action: 'update_columns', sort: 1, columns: state.columnsStr(), salt: Math.random())
       @listenTo options.app, 'table:reorder', =>
-        @postPage(action: 'update_columns', order: 1, columns: state.columnsStr())
+        @postPage(action: 'update_columns', order: 1, columns: state.columnsStr(), salt: Math.random())
       @listenTo options.app, 'table:widths', =>
-        @_saveState(data: {action: 'update_dimensions', columns: state.columnsStr() })
+        @_saveState(data: {action: 'update_dimensions', columns: state.columnsStr(), salt: Math.random() })
+      @listenTo options.app, 'container:render', =>
+        options.containerRender(@table)
+
 
       #TODO api object/service
       @pageUrl = options.pageUrl
@@ -61,4 +70,4 @@ define ['underscore', 'backbone'], (_, Backbone) ->
         data: options.data
 
     _apiUrl: (index) ->
-      @table.url.replace('#{page}', index)
+      @table.url.replace('#{page}', index) + '&salt=' + Math.random()
